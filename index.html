@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>절대강자 가계부</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div id="app" class="max-w-md mx-auto bg-gray-50 min-h-screen pb-20"></div>
+
+  <script>
+    // State Management
+    const state = {
+      activeTab: 'home',
+      transactions: [],
+      memos: [],
+      events: [],
+      goals: { year7: '', year5: '', year3: '', thisYear: '' },
+      bankBalances: [],
+      categories: {
+        expense: ['식비', '교통비', '통신비', '생활용품', '의료비', '교육비', '문화생활', '아버지', '지환', '다혜', '다연', '보험료', '외식비', '세금공과금', '주유비', '기타비'],
+        income: ['급여', '이자', '대리업무', '배당금', '기타수입']
+      },
+      undoStack: [],
+      showAddTransaction: false,
+      showCompoundCalc: false,
+      showSettings: false,
+      isLoading: true
+    };
+
+    // Storage helpers
+    const storage = {
+      get: (key) => {
+        try {
+          const value = localStorage.getItem(key);
+          return value ? JSON.parse(value) : null;
+        } catch { return null; }
+      },
+      set: (key, value) => {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (e) { console.error('Storage error:', e); }
+      }
+    };
+
+    // Load data
+    function loadData() {
+      state.transactions = storage.get('transactions') || [];
+      state.memos = storage.get('memos') || [];
+      state.events = storage.get('events') || [];
+      state.goals = storage.get('goals') || { year7: '', year5: '', year3: '', thisYear: '' };
+      state.bankBalances = storage.get('bankBalances') || [];
+      state.categories = storage.get('categories') || state.categories;
+      state.isLoading = false;
+      render();
+    }
+
+    // Save data
+    function saveData() {
+      storage.set('transactions', state.transactions);
+      storage.set('memos', state.memos);
+      storage.set('events', state.events);
+      storage.set('goals', state.goals);
+      storage.set('bankBalances', state.bankBalances);
+      storage.set('categories', state.categories);
+    }
+
+    // Toast notification
+    let toastTimeout;
+    function showToast(message, type = 'success') {
+      const existing = document.getElementById('toast');
+      if (existing) existing.remove();
+      
+      const toast = document.createElement('div');
+      toast.id = 'toast';
+      toast.className = `fixed top-20 left-1/2 transform -translate-x-1/2 px-4 py-3 rounded-lg shadow-lg z-50 ${
+        type === 'error' ? 'bg-red-500' : 'bg-green-500'
+      } text-white font-medium animate-fade-in`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Utility functions
+    function formatNumber(num) {
+      return num.toLocaleString();
+    }
+
+    function getRankInfo(balance) {
+      if (balance >= 500000000) return { rank: '절대강자', color: 'text-purple-600', bgColor: 'bg-purple-100', icon: '👑' };
+      if (balance >= 200000000) return { rank: '소부자', color: 'text-blue-600', bgColor: 'bg-blue-100', icon: '💎' };
+      if (balance >= 100000000) return { rank: '중산층', color: 'text-green-600', bgColor: 'bg-green-100', icon: '🏆' };
+      if (balance >= 50000000) return { rank: '서민', color: 'text-yellow-600', bgColor: 'bg-yellow-100', icon: '⭐' };
+      if (balance >= 10000000) return { rank: '차상위자', color: 'text-orange-600', bgColor: 'bg-orange-100', icon: '🔶' };
+      return { rank: '기초수급자', color: 'text-gray-600', bgColor: 'bg-gray-100', icon: '🌱' };
+    }
+
+    function addToUndoStack(action, data) {
+      state.undoStack.push({ action, data, timestamp: Date.now() });
+      if (state.undoStack.length > 10) state.undoStack.shift();
+    }
+
+    function handleUndo() {
+      if (state.undoStack.length === 0) return;
+      const lastAction = state.undoStack.pop();
+      
+      if (lastAction.action === 'deleteTransaction') {
+        state.transactions.push(lastAction.data);
+        showToast('거래 삭제를 취소했습니다');
+      } else if (lastAction.action === 'deleteMemo') {
+        state.memos.push(lastAction.data);
+        showToast('메모 삭제를 취소했습니다');
+      }
+      saveData();
+      render();
+    }
+
+    // Export functions
+    function exportData() {
+      const data = {
+        transactions: state.transactions,
+        memos: state.memos,
+        goals: state.goals,
+        bankBalances: state.bankBalances,
+        events: state.events,
+        categories: state.categories,
+        exportDate: new Date().toISOString()
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `budget_backup_${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('데이터가 백업되었습니다');
+    }
+
+    function exportToCSV() {
+      const headers = ['날짜', '유형', '카테고리', '금액', '결제수단', '할부', '필요지출', '메모'];
+      const rows = state.transactions.map(t => [
+        t.date,
+        t.type === 'income' ? '수입' : '지출',
+        t.category,
+        t.amount,
+        t.paymentMethod === 'card' ? '카드' : '현금',
+        t.installment || '일시불',
+        t.isNecessary ? '필요' : '불필요',
+        t.memo || ''
+      ]);
+
+      const csvContent = [headers, ...rows]
+        .map(row => row.map(cell => `"${cell}"`).join(','))
+        .join('\n');
+
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `거래내역_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('CSV 파일이 다운로드되었습니다');
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!data.transactions || !Array.isArray(data.transactions)) {
+            throw new Error('잘못된 데이터 형식');
+          }
+
+          if (confirm('현재 데이터를 모두 삭제하고 가져온 데이터로 교체하시겠습니까?')) {
+            state.transactions = data.transactions || [];
+            state.memos = data.memos || [];
+            state.goals = data.goals || { year7: '', year5: '', year3: '', thisYear: '' };
+            state.bankBalances = data.bankBalances || [];
+            state.events = data.events || [];
+            if (data.categories) state.categories = data.categories;
+            saveData();
+            render();
+            showToast('데이터를 성공적으로 가져왔습니다');
+          }
+        } catch (error) {
+          showToast('데이터 가져오기에 실패했습니다', 'error');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    // Render functions
+    function renderHeader() {
+      const totalBankBalance = state.bankBalances.reduce((sum, b) => sum + b.balance, 0);
+      const rankInfo = getRankInfo(totalBankBalance);
+      
+      return `
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 sticky top-0 z-10 shadow-lg">
+          <div class="flex justify-between items-center">
+            <h1 class="text-xl font-bold">절대강자 가계부</h1>
+            <div class="flex items-center gap-2">
+              <button onclick="state.showCompoundCalc=true;render()" class="bg-white text-blue-600 px-3 py-1 rounded-full text-sm font-bold hover:bg-blue-50 transition shadow-md">복리</button>
+              <button onclick="state.showSettings=true;render()" class="bg-white text-blue-600 p-2 rounded-full hover:bg-blue-50 transition shadow-md">
+                <i data-lucide="settings" class="w-4 h-4"></i>
+              </button>
+              <div class="${rankInfo.bgColor} px-3 py-1 rounded-full flex items-center gap-1 shadow-md">
+                <span class="text-base">${rankInfo.icon}</span>
+                <span class="text-sm font-bold ${rankInfo.color}">${rankInfo.rank}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHomeScreen() {
+      const today = new Date();
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+
+      const monthlyTx = state.transactions.filter(t => {
+        const d = new Date(t.date);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+      });
+
+      const totalIncome = monthlyTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const totalExpense = monthlyTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+      const necessaryExpense = monthlyTx.filter(t => t.type === 'expense' && t.isNecessary).reduce((s, t) => s + t.amount, 0);
+      const unnecessaryExpense = monthlyTx.filter(t => t.type === 'expense' && !t.isNecessary).reduce((s, t) => s + t.amount, 0);
+
+      const installmentTx = state.transactions.filter(t => t.installment > 0);
+      const monthlyInstallment = installmentTx.reduce((sum, t) => {
+        const tDate = new Date(t.date);
+        const monthsSinceStart = (currentYear - tDate.getFullYear()) * 12 + (currentMonth - tDate.getMonth());
+        if (monthsSinceStart >= 0 && monthsSinceStart < t.installment) {
+          return sum + (t.amount / t.installment);
+        }
+        return sum;
+      }, 0);
+
+      const remainingInstallment = installmentTx.reduce((sum, t) => {
+        const tDate = new Date(t.date);
+        const monthsSinceStart = (currentYear - tDate.getFullYear()) * 12 + (currentMonth - tDate.getMonth());
+        const remainingMonths = Math.max(0, t.installment - monthsSinceStart);
+        return sum + (t.amount / t.installment * remainingMonths);
+      }, 0);
+
+      const totalBalance = totalIncome - totalExpense;
+      const recentTx = [...state.transactions].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
+
+      return `
+        <div class="p-4 space-y-4">
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg">
+            <div class="text-sm opacity-90 mb-1">총 잔액</div>
+            <div class="text-3xl font-bold mb-3">${formatNumber(totalBalance)}원</div>
+            <div class="flex gap-2">
+              ${state.undoStack.length > 0 ? `
+                <button onclick="handleUndo()" class="bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-blue-50 transition">
+                  <i data-lucide="undo-2" class="w-4 h-4"></i> 실행 취소
+                </button>
+              ` : ''}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-green-50 p-4 rounded-lg border border-green-200 shadow-sm">
+              <div class="text-xs text-green-600 mb-1">이번 달 수입</div>
+              <div class="text-xl font-bold text-green-700">${formatNumber(totalIncome)}원</div>
+            </div>
+            <div class="bg-red-50 p-4 rounded-lg border border-red-200 shadow-sm">
+              <div class="text-xs text-red-600 mb-1">이번 달 지출</div>
+              <div class="text-xl font-bold text-red-700">${formatNumber(totalExpense)}원</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200 shadow-sm">
+              <div class="text-xs text-purple-600 mb-1">이번 달 할부</div>
+              <div class="text-lg font-bold text-purple-700">${formatNumber(Math.round(monthlyInstallment))}원</div>
+            </div>
+            <div class="bg-orange-50 p-4 rounded-lg border border-orange-200 shadow-sm">
+              <div class="text-xs text-orange-600 mb-1">남은 할부</div>
+              <div class="text-lg font-bold text-orange-700">${formatNumber(Math.round(remainingInstallment))}원</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 shadow-sm">
+              <div class="text-xs text-blue-600 mb-1">필요 지출</div>
+              <div class="text-lg font-bold text-blue-700">${formatNumber(necessaryExpense)}원</div>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
+              <div class="text-xs text-gray-600 mb-1">불필요 지출</div>
+              <div class="text-lg font-bold text-gray-700">${formatNumber(unnecessaryExpense)}원</div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-lg p-4">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="font-bold">최근 거래 내역</h3>
+              <div class="flex gap-2">
+                <button onclick="exportToCSV()" class="text-blue-600 text-sm flex items-center gap-1">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i> CSV
+                </button>
+                <button onclick="exportData()" class="text-blue-600 text-sm flex items-center gap-1">
+                  <i data-lucide="share-2" class="w-3.5 h-3.5"></i> 백업
+                </button>
+              </div>
+            </div>
+            <div class="space-y-2">
+              ${recentTx.length === 0 ? '<div class="text-center text-gray-400 py-4">거래 내역이 없습니다</div>' :
+                recentTx.map(t => `
+                  <div class="flex justify-between items-center py-2 border-b last:border-b-0">
+                    <div>
+                      <div class="font-medium">${t.category}</div>
+                      <div class="text-xs text-gray-500">${t.date}</div>
+                    </div>
+                    <div class="font-bold ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}">
+                      ${t.type === 'income' ? '+' : '-'}${formatNumber(t.amount)}원
+                    </div>
+                  </div>
+                `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHistoryScreen() {
+      return `
+        <div class="p-4" id="history-screen">
+          <div class="mb-4 space-y-2">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs text-gray-600 mb-1">시작일</label>
+                <input type="date" id="startDate" class="w-full p-2 border rounded text-sm">
+              </div>
+              <div>
+                <label class="block text-xs text-gray-600 mb-1">종료일</label>
+                <input type="date" id="endDate" class="w-full p-2 border rounded text-sm">
+              </div>
+            </div>
+            <input type="text" id="searchKeyword" class="w-full p-2 border rounded" placeholder="키워드 검색">
+          </div>
+
+          <div class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
+            <button onclick="setHistoryPeriod('daily')" class="period-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-blue-500 text-white shadow-md" data-period="daily">일별</button>
+            <button onclick="setHistoryPeriod('weekly')" class="period-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-gray-200" data-period="weekly">주별</button>
+            <button onclick="setHistoryPeriod('monthly')" class="period-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-gray-200" data-period="monthly">월별</button>
+            <button onclick="setHistoryPeriod('yearly')" class="period-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-gray-200" data-period="yearly">년도별</button>
+          </div>
+
+          <div id="history-list" class="space-y-4"></div>
+        </div>
+      `;
+    }
+
+    let historyPeriod = 'daily';
+    let editingTxId = null;
+
+    function setHistoryPeriod(period) {
+      historyPeriod = period;
+      document.querySelectorAll('.period-btn').forEach(btn => {
+        btn.className = btn.dataset.period === period 
+          ? 'period-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-blue-500 text-white shadow-md'
+          : 'period-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-gray-200';
+      });
+      updateHistoryList();
+    }
+
+    function updateHistoryList() {
+      const startDate = document.getElementById('startDate')?.value;
+      const endDate = document.getElementById('endDate')?.value;
+      const keyword = document.getElementById('searchKeyword')?.value || '';
+
+      const filtered = state.transactions.filter(t => {
+        const tDate = new Date(t.date);
+        const start = startDate ? new Date(startDate) : null;
+        const end = endDate ? new Date(endDate) : null;
+        const dateMatch = (!start || tDate >= start) && (!end || tDate <= end);
+        const keywordMatch = !keyword || t.category.includes(keyword) || (t.memo && t.memo.includes(keyword));
+        return dateMatch && keywordMatch;
+      });
+
+      const grouped = {};
+      filtered.forEach(t => {
+        const date = new Date(t.date);
+        let key;
+        if (historyPeriod === 'daily') key = t.date;
+        else if (historyPeriod === 'weekly') {
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay());
+          key = weekStart.toISOString().split('T')[0];
+        } else if (historyPeriod === 'monthly') {
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        } else {
+          key = String(date.getFullYear());
+        }
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(t);
+      });
+
+      const listEl = document.getElementById('history-list');
+      if (!listEl) return;
+
+      if (Object.keys(grouped).length === 0) {
+        listEl.innerHTML = '<div class="text-center text-gray-400 py-8">거래 내역이 없습니다</div>';
+        return;
+      }
+
+      listEl.innerHTML = Object.keys(grouped).sort().reverse().map(period => {
+        const txs = grouped[period];
+        const income = txs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+        const expense = txs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+        const balance = income - expense;
+
+        return `
+          <div class="bg-white rounded-xl shadow-lg p-4">
+            <div class="mb-3">
+              <h3 class="font-bold text-lg mb-2">${period}</h3>
+              <div class="grid grid-cols-3 gap-2 bg-gray-50 p-3 rounded-lg">
+                <div><div class="text-xs text-green-600">수입</div><div class="text-sm font-bold text-green-700">${formatNumber(income)}원</div></div>
+                <div><div class="text-xs text-red-600">지출</div><div class="text-sm font-bold text-red-700">${formatNumber(expense)}원</div></div>
+                <div><div class="text-xs text-blue-600">잔고</div><div class="text-sm font-bold ${balance >= 0 ? 'text-blue-700' : 'text-red-700'}">${formatNumber(balance)}원</div></div>
+              </div>
+            </div>
+            ${txs.map(t => `
+              <div class="border-b py-2 last:border-b-0" id="tx-${t.id}">
+                <div class="flex justify-between items-center">
+                  <div class="flex-1">
+                    <div class="font-medium">${t.category}</div>
+                    <div class="text-xs text-gray-500">${t.date} ${t.memo ? `- ${t.memo}` : ''}</div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="font-bold ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}">
+                      ${t.type === 'income' ? '+' : '-'}${formatNumber(t.amount)}원
+                    </div>
+                    <button onclick="editTransaction(${t.id})" class="text-blue-500 text-sm px-1">수정</button>
+                    <button onclick="deleteTransaction(${t.id})" class="text-red-500 text-sm px-1">삭제</button>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteTransaction(id) {
+      if (confirm('정말 삭제하시겠습니까?')) {
+        const tx = state.transactions.find(t => t.id === id);
+        if (tx) addToUndoStack('deleteTransaction', tx);
+        state.transactions = state.transactions.filter(t => t.id !== id);
+        saveData();
+        updateHistoryList();
+        showToast('거래가 삭제되었습니다');
+      }
+    }
+
+    function editTransaction(id) {
+      const tx = state.transactions.find(t => t.id === id);
+      if (!tx) return;
+      
+      const newAmount = prompt('금액:', tx.amount);
+      if (newAmount === null) return;
+      
+      const newCategory = prompt('카테고리:', tx.category);
+      if (newCategory === null) return;
+      
+      const newMemo = prompt('메모:', tx.memo || '');
+      if (newMemo === null) return;
+      
+      tx.amount = Number(newAmount) || tx.amount;
+      tx.category = newCategory || tx.category;
+      tx.memo = newMemo;
+      
+      saveData();
+      updateHistoryList();
+      showToast('거래가 수정되었습니다');
+    }
+
+    function renderStatsScreen() {
+      return `
+        <div class="p-4" id="stats-screen">
+          <div class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
+            <button onclick="setStatsPeriod('daily')" class="stats-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-gray-200" data-period="daily">일별</button>
+            <button onclick="setStatsPeriod('weekly')" class="stats-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-gray-200" data-period="weekly">주별</button>
+            <button onclick="setStatsPeriod('monthly')" class="stats-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-blue-500 text-white shadow-md" data-period="monthly">월별</button>
+            <button onclick="setStatsPeriod('yearly')" class="stats-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-gray-200" data-period="yearly">년도별</button>
+          </div>
+          <div id="stats-content"></div>
+        </div>
+      `;
+    }
+
+    let statsPeriod = 'monthly';
+
+    function setStatsPeriod(period) {
+      statsPeriod = period;
+      document.querySelectorAll('.stats-btn').forEach(btn => {
+        btn.className = btn.dataset.period === period 
+          ? 'stats-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-blue-500 text-white shadow-md'
+          : 'stats-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-gray-200';
+      });
+      updateStatsContent();
+    }
+
+    function updateStatsContent() {
+      const now = new Date();
+      const filtered = state.transactions.filter(t => {
+        const d = new Date(t.date);
+        if (statsPeriod === 'daily') return d.toDateString() === now.toDateString();
+        if (statsPeriod === 'weekly') return d >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        if (statsPeriod === 'monthly') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        return d.getFullYear() === now.getFullYear();
+      });
+
+      const categoryStats = {};
+      filtered.forEach(t => {
+        if (!categoryStats[t.category]) categoryStats[t.category] = { income: 0, expense: 0 };
+        if (t.type === 'income') categoryStats[t.category].income += t.amount;
+        else categoryStats[t.category].expense += t.amount;
+      });
+
+      const totalIncome = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const totalExpense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+      const maxAmount = Math.max(totalIncome, totalExpense, 1);
+
+      const contentEl = document.getElementById('stats-content');
+      if (!contentEl) return;
+
+      contentEl.innerHTML = `
+        <div class="bg-white rounded-xl shadow-lg p-4 mb-4">
+          <h3 class="font-bold mb-4">수입 / 지출 합계</h3>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="text-green-600 font-medium">수입</span>
+                <span class="text-green-600 font-bold">${formatNumber(totalIncome)}원</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-6">
+                <div class="bg-gradient-to-r from-green-400 to-green-500 h-6 rounded-full flex items-center justify-end pr-2 transition-all" style="width: ${(totalIncome / maxAmount) * 100}%">
+                  <span class="text-xs text-white font-bold">${Math.round((totalIncome / maxAmount) * 100)}%</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="text-red-600 font-medium">지출</span>
+                <span class="text-red-600 font-bold">${formatNumber(totalExpense)}원</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-6">
+                <div class="bg-gradient-to-r from-red-400 to-red-500 h-6 rounded-full flex items-center justify-end pr-2 transition-all" style="width: ${(totalExpense / maxAmount) * 100}%">
+                  <span class="text-xs text-white font-bold">${Math.round((totalExpense / maxAmount) * 100)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-4">
+          <h3 class="font-bold mb-4">카테고리별 통계</h3>
+          <div class="space-y-3">
+            ${Object.keys(categoryStats).length === 0 ? '<div class="text-center text-gray-400 py-4">데이터가 없습니다</div>' :
+              Object.entries(categoryStats).map(([cat, amounts]) => `
+                <div class="border-b pb-3">
+                  <div class="font-medium mb-2">${cat}</div>
+                  ${amounts.income > 0 ? `
+                    <div class="mb-1">
+                      <div class="flex justify-between text-xs mb-1">
+                        <span class="text-green-600">수입</span>
+                        <span class="text-green-600 font-bold">${formatNumber(amounts.income)}원</span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div class="bg-green-400 h-4 rounded-full transition-all" style="width: ${(amounts.income / maxAmount) * 100}%"></div>
+                      </div>
+                    </div>
+                  ` : ''}
+                  ${amounts.expense > 0 ? `
+                    <div>
+                      <div class="flex justify-between text-xs mb-1">
+                        <span class="text-red-600">지출</span>
+                        <span class="text-red-600 font-bold">${formatNumber(amounts.expense)}원</span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div class="bg-red-400 h-4 rounded-full transition-all" style="width: ${(amounts.expense / maxAmount) * 100}%"></div>
+                      </div>
+                    </div>
+                  ` : ''}
+                </div>
+              `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGoalScreen() {
+      const totalBank = state.bankBalances.reduce((s, b) => s + b.balance, 0);
+      const calcAchievement = (goal) => {
+        const g = Number(goal) || 0;
+        return g === 0 ? 0 : Math.min((totalBank / g) * 100, 100);
+      };
+
+      const goalData = [
+        { label: '7년 목표', key: 'year7', icon: '👑', color: 'purple' },
+        { label: '5년 목표', key: 'year5', icon: '💎', color: 'blue' },
+        { label: '3년 목표', key: 'year3', icon: '🏆', color: 'green' },
+        { label: '올해 목표', key: 'thisYear', icon: '⭐', color: 'yellow' }
+      ];
+
+      return `
+        <div class="p-4 space-y-6">
+          <div class="bg-white rounded-xl shadow-lg p-4">
+            <h3 class="font-bold mb-4">수입 목표</h3>
+            <div class="space-y-3">
+              ${goalData.map(g => `
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-${g.color}-700">${g.icon} ${g.label}</label>
+                  <div class="relative">
+                    <input type="number" id="goal-${g.key}" value="${state.goals[g.key]}" class="w-full p-2 pr-8 border-2 border-${g.color}-300 rounded-lg bg-${g.color}-50 focus:border-${g.color}-500 focus:outline-none" placeholder="금액 입력">
+                    <span class="absolute right-3 top-2.5 text-gray-500 text-sm">원</span>
+                  </div>
+                </div>
+              `).join('')}
+              <button onclick="saveGoals()" class="w-full bg-blue-500 text-white py-2 rounded-lg font-medium hover:bg-blue-600 transition shadow-md">목표 저장</button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-lg p-4">
+            <h3 class="font-bold mb-4">목표 달성 현황</h3>
+            <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg mb-4">
+              <div class="text-sm text-blue-600">현재 통장 잔고</div>
+              <div class="text-2xl font-bold text-blue-700">${formatNumber(totalBank)}원</div>
+            </div>
+            <div class="space-y-4">
+              ${goalData.filter(g => Number(state.goals[g.key]) > 0).map(g => {
+                const goalAmt = Number(state.goals[g.key]);
+                const ach = calcAchievement(state.goals[g.key]);
+                const remaining = Math.max(0, goalAmt - totalBank);
+                const barColor = ach >= 100 ? 'from-green-400 to-green-500' : ach >= 75 ? 'from-blue-400 to-blue-500' : ach >= 50 ? 'from-yellow-400 to-yellow-500' : 'from-orange-400 to-orange-500';
+                return `
+                  <div class="border-b pb-4 last:border-b-0">
+                    <div class="flex justify-between items-center mb-2">
+                      <span class="font-medium text-gray-700">${g.label}</span>
+                      <span class="text-sm text-gray-600">${formatNumber(totalBank)} / ${formatNumber(goalAmt)}원</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-8 mb-2 relative overflow-hidden">
+                      <div class="h-8 rounded-full flex items-center justify-end pr-3 transition-all bg-gradient-to-r ${barColor}" style="width: ${ach}%">
+                        <span class="text-white font-bold text-sm">${ach.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-600">
+                      <span>달성률: ${ach.toFixed(1)}%</span>
+                      ${remaining > 0 ? `<span class="text-red-600">목표까지: ${formatNumber(remaining)}원</span>` : ''}
+                      ${ach >= 100 ? '<span class="text-green-600 font-bold">✓ 목표 달성!</span>' : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('') || '<div class="text-center text-gray-400 py-4">목표를 설정해주세요</div>'}
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-lg p-4">
+            <h3 class="font-bold mb-4">은행별 통합잔고</h3>
+            <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg mb-4">
+              <div class="text-sm text-blue-600">총 잔고</div>
+              <div class="text-2xl font-bold text-blue-700">${formatNumber(totalBank)}원</div>
+            </div>
+            <div class="space-y-2 mb-4" id="bank-list">
+              ${state.bankBalances.map(b => `
+                <div class="flex justify-between items-center p-3 border rounded-lg bg-gray-50">
+                  <div><div class="font-medium">${b.name}</div><div class="text-sm text-gray-600">${formatNumber(b.balance)}원</div></div>
+                  <button onclick="deleteBank(${b.id})" class="text-red-500 text-sm px-2 py-1 hover:bg-red-50 rounded">삭제</button>
+                </div>
+              `).join('')}
+            </div>
+            <div class="space-y-2">
+              <input type="text" id="newBankName" class="w-full p-2 border rounded-lg" placeholder="은행명">
+              <input type="number" id="newBankBalance" class="w-full p-2 border rounded-lg" placeholder="잔고">
+              <button onclick="addBank()" class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition shadow-md">은행 추가</button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-lg p-4">
+            <h3 class="font-bold mb-4">일일 메모장</h3>
+            <input type="date" id="searchMemoDate" class="w-full p-2 border rounded-lg mb-2" placeholder="날짜 검색" onchange="filterMemos()">
+            <div class="space-y-3 mb-4 max-h-64 overflow-y-auto" id="memo-list"></div>
+            <div class="space-y-2">
+              <input type="date" id="memoDate" value="${new Date().toISOString().split('T')[0]}" class="w-full p-2 border rounded-lg">
+              <textarea id="memoContent" class="w-full p-2 border rounded-lg" rows="4" placeholder="오늘의 메모를 작성하세요"></textarea>
+              <button onclick="addMemo()" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition shadow-md">메모 추가</button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-lg p-4">
+            <h3 class="font-bold mb-4">📅 행사일정 캘린더</h3>
+            <div class="space-y-3 mb-4 max-h-64 overflow-y-auto" id="event-list"></div>
+            <div class="space-y-2 border-t pt-4">
+              <input type="text" id="eventTitle" class="w-full p-2 border rounded-lg" placeholder="행사 제목">
+              <input type="date" id="eventDate" value="${new Date().toISOString().split('T')[0]}" class="w-full p-2 border rounded-lg">
+              <input type="text" id="eventDesc" class="w-full p-2 border rounded-lg" placeholder="행사 설명 (선택사항)">
+              <button onclick="addEvent()" class="w-full bg-purple-500 text-white py-2 rounded-lg hover:bg-purple-600 transition shadow-md">행사 추가</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function saveGoals() {
+      state.goals = {
+        year7: document.getElementById('goal-year7')?.value || '',
+        year5: document.getElementById('goal-year5')?.value || '',
+        year3: document.getElementById('goal-year3')?.value || '',
+        thisYear: document.getElementById('goal-thisYear')?.value || ''
+      };
+      saveData();
+      showToast('목표가 저장되었습니다');
+      render();
+    }
+
+    function addBank() {
+      const name = document.getElementById('newBankName')?.value;
+      const balance = Number(document.getElementById('newBankBalance')?.value);
+      if (!name || isNaN(balance)) { alert('은행명과 잔고를 입력해주세요'); return; }
+      state.bankBalances.push({ id: Date.now(), name, balance });
+      saveData();
+      render();
+      showToast('은행이 추가되었습니다');
+    }
+
+    function deleteBank(id) {
+      if (confirm('은행을 삭제하시겠습니까?')) {
+        state.bankBalances = state.bankBalances.filter(b => b.id !== id);
+        saveData();
+        render();
+        showToast('은행이 삭제되었습니다');
+      }
+    }
+
+    function addMemo() {
+      const date = document.getElementById('memoDate')?.value;
+      const content = document.getElementById('memoContent')?.value;
+      if (!content) return;
+      state.memos.push({ id: Date.now(), date, content });
+      saveData();
+      document.getElementById('memoContent').value = '';
+      filterMemos();
+      showToast('메모가 추가되었습니다');
+    }
+
+    function deleteMemo(id) {
+      if (confirm('메모를 삭제하시겠습니까?')) {
+        const memo = state.memos.find(m => m.id === id);
+        if (memo) addToUndoStack('deleteMemo', memo);
+        state.memos = state.memos.filter(m => m.id !== id);
+        saveData();
+        filterMemos();
+        showToast('메모가 삭제되었습니다');
+      }
+    }
+
+    function filterMemos() {
+      const searchDate = document.getElementById('searchMemoDate')?.value || '';
+      const filtered = state.memos.filter(m => !searchDate || m.date.includes(searchDate));
+      const listEl = document.getElementById('memo-list');
+      if (!listEl) return;
+      listEl.innerHTML = filtered.length === 0 ? '<div class="text-center text-gray-400 py-4">메모가 없습니다</div>' :
+        filtered.sort((a, b) => new Date(b.date) - new Date(a.date)).map(m => `
+          <div class="border rounded-lg p-3 bg-yellow-50">
+            <div class="flex justify-between items-start mb-2">
+              <div class="text-sm text-gray-600">${m.date}</div>
+              <button onclick="deleteMemo(${m.id})" class="text-red-500 text-sm">삭제</button>
+            </div>
+            <div class="text-gray-800 whitespace-pre-wrap">${m.content}</div>
+          </div>
+        `).join('');
+    }
+
+    function addEvent() {
+      const title = document.getElementById('eventTitle')?.value;
+      const date = document.getElementById('eventDate')?.value;
+      const description = document.getElementById('eventDesc')?.value || '';
+      if (!title || !date) { alert('행사 제목과 날짜를 입력해주세요'); return; }
+      state.events.push({ id: Date.now(), title, date, description });
+      saveData();
+      document.getElementById('eventTitle').value = '';
+      document.getElementById('eventDesc').value = '';
+      updateEventList();
+      showToast('행사가 추가되었습니다');
+    }
+
+    function deleteEvent(id) {
+      if (confirm('이 행사를 삭제하시겠습니까?')) {
+        state.events = state.events.filter(e => e.id !== id);
+        saveData();
+        updateEventList();
+        showToast('행사가 삭제되었습니다');
+      }
+    }
+
+    function updateEventList() {
+      const listEl = document.getElementById('event-list');
+      if (!listEl) return;
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      listEl.innerHTML = state.events.length === 0 ? '<div class="text-center text-gray-400 py-4">등록된 행사가 없습니다</div>' :
+        state.events.sort((a, b) => new Date(a.date) - new Date(b.date)).map(e => {
+          const eventDate = new Date(e.date); eventDate.setHours(0, 0, 0, 0);
+          const daysUntil = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+          const isPast = daysUntil < 0, isToday = daysUntil === 0, isUpcoming = daysUntil > 0 && daysUntil <= 7;
+          const bgClass = isPast ? 'bg-gray-50 opacity-60' : isToday ? 'bg-red-50 border-red-300' : isUpcoming ? 'bg-yellow-50 border-yellow-300' : 'bg-white';
+          return `
+            <div class="border rounded-lg p-3 ${bgClass}">
+              <div class="flex justify-between items-start mb-2">
+                <div class="flex-1"><div class="font-bold text-gray-800">${e.title}</div><div class="text-sm text-gray-600 mt-1">${e.date}</div>${e.description ? `<div class="text-sm text-gray-500 mt-1">${e.description}</div>` : ''}</div>
+                <button onclick="deleteEvent(${e.id})" class="text-red-500 text-sm ml-2">삭제</button>
+              </div>
+              <div class="flex items-center gap-2 text-xs">
+                ${isPast ? '<span class="text-gray-500">종료됨</span>' : isToday ? '<span class="text-red-600 font-bold">🔔 오늘!</span>' : isUpcoming ? `<span class="text-orange-600 font-bold">⚠️ ${daysUntil}일 남음</span>` : `<span class="text-blue-600">📍 ${daysUntil}일 남음</span>`}
+              </div>
+            </div>
+          `;
+        }).join('');
+    }
+
+    function renderAddTransactionModal() {
+      return `
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onclick="if(event.target===this){state.showAddTransaction=false;render();}">
+          <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="p-4 border-b sticky top-0 bg-white rounded-t-xl">
+              <h2 class="text-xl font-bold">거래 추가</h2>
+            </div>
+            <div class="p-4 space-y-4">
+              <div class="flex gap-2">
+                <button id="btn-expense" onclick="setTxType('expense')" class="flex-1 py-2 rounded-lg transition bg-red-500 text-white shadow-md">지출</button>
+                <button id="btn-income" onclick="setTxType('income')" class="flex-1 py-2 rounded-lg transition bg-gray-200">수입</button>
+              </div>
+              <input type="hidden" id="txType" value="expense">
+              <div><label class="block text-sm font-medium mb-1">날짜</label><input type="date" id="txDate" value="${new Date().toISOString().split('T')[0]}" class="w-full p-2 border rounded-lg"></div>
+              <div><label class="block text-sm font-medium mb-1">금액</label><input type="number" id="txAmount" class="w-full p-2 border rounded-lg" placeholder="금액 입력"></div>
+              <div id="expense-options">
+                <div><label class="block text-sm font-medium mb-1">결제수단</label>
+                  <select id="txPayment" onchange="toggleInstallment()" class="w-full p-2 border rounded-lg"><option value="card">카드</option><option value="cash">현금</option></select>
+                </div>
+                <div id="installment-div" class="mt-4"><label class="block text-sm font-medium mb-1">할부</label>
+                  <select id="txInstallment" class="w-full p-2 border rounded-lg"><option value="0">일시불</option>${[2,3,4,5,6,7,8,9,10,11,12,15,18,20,24,30,36].map(m => `<option value="${m}">${m}개월</option>`).join('')}</select>
+                </div>
+                <div class="mt-4"><label class="block text-sm font-medium mb-1">지출 유형</label>
+                  <div class="flex gap-2">
+                    <button id="btn-necessary" onclick="setNecessary(true)" class="flex-1 py-2 rounded-lg transition bg-blue-500 text-white shadow-md">필요지출</button>
+                    <button id="btn-unnecessary" onclick="setNecessary(false)" class="flex-1 py-2 rounded-lg transition bg-gray-200">불필요지출</button>
+                  </div>
+                  <input type="hidden" id="txNecessary" value="true">
+                </div>
+              </div>
+              <div><label class="block text-sm font-medium mb-1">카테고리</label>
+                <select id="txCategory" class="w-full p-2 border rounded-lg"><option value="">선택하세요</option>${state.categories.expense.map(c => `<option value="${c}">${c}</option>`).join('')}</select>
+              </div>
+              <div><label class="block text-sm font-medium mb-1">메모</label><textarea id="txMemo" class="w-full p-2 border rounded-lg" rows="3" placeholder="메모 입력"></textarea></div>
+              <div class="flex gap-2 pt-4">
+                <button onclick="submitTransaction()" class="flex-1 bg-blue-500 text-white py-3 rounded-lg font-medium shadow-md hover:bg-blue-600 transition">저장</button>
+                <button onclick="state.showAddTransaction=false;render()" class="flex-1 bg-gray-300 py-3 rounded-lg font-medium hover:bg-gray-400 transition">취소</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    let currentTxType = 'expense';
+    let isNecessary = true;
+
+    function setTxType(type) {
+      currentTxType = type;
+      document.getElementById('txType').value = type;
+      document.getElementById('btn-expense').className = type === 'expense' ? 'flex-1 py-2 rounded-lg transition bg-red-500 text-white shadow-md' : 'flex-1 py-2 rounded-lg transition bg-gray-200';
+      document.getElementById('btn-income').className = type === 'income' ? 'flex-1 py-2 rounded-lg transition bg-green-500 text-white shadow-md' : 'flex-1 py-2 rounded-lg transition bg-gray-200';
+      document.getElementById('expense-options').style.display = type === 'expense' ? 'block' : 'none';
+      
+      const catSelect = document.getElementById('txCategory');
+      catSelect.innerHTML = '<option value="">선택하세요</option>' + state.categories[type].map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    function setNecessary(val) {
+      isNecessary = val;
+      document.getElementById('txNecessary').value = val;
+      document.getElementById('btn-necessary').className = val ? 'flex-1 py-2 rounded-lg transition bg-blue-500 text-white shadow-md' : 'flex-1 py-2 rounded-lg transition bg-gray-200';
+      document.getElementById('btn-unnecessary').className = !val ? 'flex-1 py-2 rounded-lg transition bg-gray-500 text-white shadow-md' : 'flex-1 py-2 rounded-lg transition bg-gray-200';
+    }
+
+    function toggleInstallment() {
+      const payment = document.getElementById('txPayment').value;
+      document.getElementById('installment-div').style.display = payment === 'card' ? 'block' : 'none';
+    }
+
+    function submitTransaction() {
+      const type = document.getElementById('txType').value;
+      const date = document.getElementById('txDate').value;
+      const amount = Number(document.getElementById('txAmount').value);
+      const category = document.getElementById('txCategory').value;
+      const memo = document.getElementById('txMemo').value;
+      
+      if (!category) { alert('카테고리를 선택해주세요'); return; }
+      if (!amount || amount <= 0) { alert('올바른 금액을 입력해주세요'); return; }
+      if (amount > 1000000000) { alert('금액이 너무 큽니다'); return; }
+
+      const tx = {
+        id: Date.now(),
+        type,
+        date,
+        amount,
+        category,
+        memo,
+        paymentMethod: type === 'expense' ? document.getElementById('txPayment').value : 'cash',
+        installment: type === 'expense' && document.getElementById('txPayment').value === 'card' ? Number(document.getElementById('txInstallment').value) : 0,
+        isNecessary: type === 'expense' ? document.getElementById('txNecessary').value === 'true' : true
+      };
+
+      state.transactions.push(tx);
+      state.showAddTransaction = false;
+      saveData();
+      render();
+      showToast('거래가 추가되었습니다');
+    }
+
+    function renderCompoundCalc() {
+      return `
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onclick="if(event.target===this){state.showCompoundCalc=false;render();}">
+          <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="p-4 border-b sticky top-0 bg-white rounded-t-xl z-10">
+              <div class="flex justify-between items-center">
+                <h2 class="text-xl font-bold">💰 적립식 복리계산기</h2>
+                <button onclick="state.showCompoundCalc=false;render()" class="text-gray-500 hover:text-gray-700 text-2xl w-8 h-8 flex items-center justify-center">✕</button>
+              </div>
+            </div>
+            <div class="p-4 space-y-4">
+              <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl space-y-3">
+                <div><label class="block text-sm font-medium mb-1">초기 투자금</label><div class="relative"><input type="number" id="calcInitial" class="w-full p-3 pr-10 border rounded-lg" placeholder="0"><span class="absolute right-3 top-3.5 text-gray-500 text-sm">원</span></div></div>
+                <div><label class="block text-sm font-medium mb-1">월 적립금</label><div class="relative"><input type="number" id="calcMonthly" class="w-full p-3 pr-10 border rounded-lg" placeholder="0"><span class="absolute right-3 top-3.5 text-gray-500 text-sm">원</span></div></div>
+                <div><label class="block text-sm font-medium mb-1">투자 기간</label><div class="relative"><input type="number" id="calcYears" class="w-full p-3 pr-10 border rounded-lg" placeholder="0"><span class="absolute right-3 top-3.5 text-gray-500 text-sm">년</span></div></div>
+                <div><label class="block text-sm font-medium mb-1">연 수익률</label><div class="relative"><input type="number" step="0.1" id="calcRate" class="w-full p-3 pr-10 border rounded-lg" placeholder="0"><span class="absolute right-3 top-3.5 text-gray-500 text-sm">%</span></div></div>
+                <button onclick="calculateCompound()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-bold hover:from-blue-700 hover:to-purple-700 transition shadow-lg">계산하기</button>
+              </div>
+              <div id="calc-result"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function calculateCompound() {
+      const initial = Number(document.getElementById('calcInitial').value) || 0;
+      const monthly = Number(document.getElementById('calcMonthly').value) || 0;
+      const years = Number(document.getElementById('calcYears').value) || 0;
+      const rate = Number(document.getElementById('calcRate').value) / 100 || 0;
+
+      if (years === 0) { alert('기간을 입력해주세요'); return; }
+
+      const yearlyData = [];
+      let currentAmount = initial;
+
+      for (let year = 1; year <= years; year++) {
+        for (let month = 1; month <= 12; month++) {
+          currentAmount += monthly;
+          currentAmount = currentAmount * (1 + rate / 12);
+        }
+        const totalDeposit = initial + (monthly * 12 * year);
+        yearlyData.push({ year, amount: Math.round(currentAmount), deposit: totalDeposit, interest: Math.round(currentAmount - totalDeposit) });
+      }
+
+      const finalAmount = Math.round(currentAmount);
+      const totalDeposit = initial + (monthly * 12 * years);
+      const totalInterest = finalAmount - totalDeposit;
+      const maxAmount = Math.max(...yearlyData.map(d => d.amount));
+
+      document.getElementById('calc-result').innerHTML = `
+        <div class="bg-gradient-to-r from-purple-100 to-blue-100 p-5 rounded-xl shadow-lg">
+          <h3 class="font-bold text-lg mb-4 text-center text-purple-700">최종 결과</h3>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-white p-4 rounded-lg text-center shadow"><div class="text-xs text-gray-600 mb-1">최종 금액</div><div class="text-lg font-bold text-purple-600">${formatNumber(finalAmount)}원</div></div>
+            <div class="bg-white p-4 rounded-lg text-center shadow"><div class="text-xs text-gray-600 mb-1">총 납입금</div><div class="text-lg font-bold text-blue-600">${formatNumber(totalDeposit)}원</div></div>
+            <div class="bg-white p-4 rounded-lg text-center shadow"><div class="text-xs text-gray-600 mb-1">총 이자</div><div class="text-lg font-bold text-green-600">${formatNumber(totalInterest)}원</div></div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border shadow-lg p-4 mt-4">
+          <h3 class="font-bold mb-4">📈 년도별 그래프</h3>
+          <div class="space-y-3">
+            ${yearlyData.map(d => `
+              <div class="space-y-1">
+                <div class="flex justify-between text-sm"><span class="font-medium">${d.year}년차</span><span class="font-bold text-purple-600">${formatNumber(d.amount)}원</span></div>
+                <div class="relative w-full bg-gray-200 rounded-full h-7 overflow-hidden">
+                  <div class="absolute left-0 top-0 h-7 bg-gradient-to-r from-blue-400 via-purple-500 to-purple-600 rounded-full flex items-center justify-end pr-2 transition-all" style="width: ${(d.amount / maxAmount) * 100}%">
+                    <span class="text-xs text-white font-bold drop-shadow">${Math.round((d.amount / maxAmount) * 100)}%</span>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSettings() {
+      return `
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onclick="if(event.target===this){state.showSettings=false;render();}">
+          <div class="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="p-4 border-b sticky top-0 bg-white rounded-t-xl z-10">
+              <div class="flex justify-between items-center">
+                <h2 class="text-xl font-bold">⚙️ 설정</h2>
+                <button onclick="state.showSettings=false;render()" class="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+              </div>
+            </div>
+            <div class="p-4 space-y-6">
+              <div class="bg-white rounded-xl border shadow-sm p-4">
+                <h3 class="font-bold mb-4">카테고리 관리</h3>
+                <div class="flex gap-2 mb-4">
+                  <button id="cat-expense-btn" onclick="setCatType('expense')" class="flex-1 py-2 rounded-lg transition bg-red-500 text-white">지출</button>
+                  <button id="cat-income-btn" onclick="setCatType('income')" class="flex-1 py-2 rounded-lg transition bg-gray-200">수입</button>
+                </div>
+                <div class="space-y-2 mb-4 max-h-48 overflow-y-auto" id="category-list"></div>
+                <div class="flex gap-2">
+                  <input type="text" id="newCatName" class="flex-1 p-2 border rounded-lg" placeholder="새 카테고리 이름">
+                  <button onclick="addCategory()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">추가</button>
+                </div>
+              </div>
+              <div class="bg-white rounded-xl border shadow-sm p-4">
+                <h3 class="font-bold mb-4">데이터 관리</h3>
+                <div class="space-y-3">
+                  <button onclick="exportData()" class="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition flex items-center justify-center gap-2"><i data-lucide="download" class="w-5 h-5"></i>데이터 백업 (JSON)</button>
+                  <button onclick="exportToCSV()" class="w-full bg-green-500 text-white py-3 rounded-lg font-medium hover:bg-green-600 transition flex items-center justify-center gap-2"><i data-lucide="download" class="w-5 h-5"></i>거래내역 내보내기 (CSV)</button>
+                  <input type="file" id="importFile" accept=".json" onchange="importData(event)" class="hidden">
+                  <button onclick="document.getElementById('importFile').click()" class="w-full bg-purple-500 text-white py-3 rounded-lg font-medium hover:bg-purple-600 transition flex items-center justify-center gap-2"><i data-lucide="upload" class="w-5 h-5"></i>데이터 가져오기 (JSON)</button>
+                  <button onclick="resetAllData()" class="w-full bg-red-500 text-white py-3 rounded-lg font-medium hover:bg-red-600 transition">모든 데이터 삭제</button>
+                </div>
+              </div>
+              <div class="bg-white rounded-xl border shadow-sm p-4">
+                <h3 class="font-bold mb-2">앱 정보</h3>
+                <div class="text-sm text-gray-600 space-y-1">
+                  <p>버전: 2.0</p>
+                  <p>총 거래: ${state.transactions.length}건</p>
+                  <p>총 메모: ${state.memos.length}개</p>
+                  <p>총 행사: ${state.events.length}개</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    let currentCatType = 'expense';
+
+    function setCatType(type) {
+      currentCatType = type;
+      document.getElementById('cat-expense-btn').className = type === 'expense' ? 'flex-1 py-2 rounded-lg transition bg-red-500 text-white' : 'flex-1 py-2 rounded-lg transition bg-gray-200';
+      document.getElementById('cat-income-btn').className = type === 'income' ? 'flex-1 py-2 rounded-lg transition bg-green-500 text-white' : 'flex-1 py-2 rounded-lg transition bg-gray-200';
+      updateCategoryList();
+    }
+
+    function updateCategoryList() {
+      const listEl = document.getElementById('category-list');
+      if (!listEl) return;
+      listEl.innerHTML = state.categories[currentCatType].map((c, i) => `
+        <div class="flex justify-between items-center p-2 border rounded bg-gray-50">
+          <span>${c}</span>
+          <button onclick="deleteCategory('${currentCatType}', ${i})" class="text-red-500 text-sm px-2">삭제</button>
+        </div>
+      `).join('');
+    }
+
+    function addCategory() {
+      const name = document.getElementById('newCatName')?.value?.trim();
+      if (!name) { alert('카테고리 이름을 입력해주세요'); return; }
+      state.categories[currentCatType].push(name);
+      saveData();
+      document.getElementById('newCatName').value = '';
+      updateCategoryList();
+      showToast('카테고리가 추가되었습니다');
+    }
+
+    function deleteCategory(type, index) {
+      if (confirm(`'${state.categories[type][index]}' 카테고리를 삭제하시겠습니까?`)) {
+        state.categories[type].splice(index, 1);
+        saveData();
+        updateCategoryList();
+        showToast('카테고리가 삭제되었습니다');
+      }
+    }
+
+    function resetAllData() {
+      if (confirm('정말 모든 데이터를 삭제하시겠습니까?') && confirm('다시 한번 확인합니다. 모든 데이터가 삭제됩니다.')) {
+        state.transactions = [];
+        state.memos = [];
+        state.events = [];
+        state.bankBalances = [];
+        state.goals = { year7: '', year5: '', year3: '', thisYear: '' };
+        state.undoStack = [];
+        saveData();
+        state.showSettings = false;
+        render();
+        showToast('모든 데이터가 삭제되었습니다');
+      }
+    }
+
+    function renderNavbar() {
+      const tabs = [
+        { id: 'home', icon: 'home', label: '홈' },
+        { id: 'history', icon: 'file-text', label: '내역' },
+        { id: 'add', icon: 'plus', label: '' },
+        { id: 'stats', icon: 'bar-chart-3', label: '통계' },
+        { id: 'goal', icon: 'target', label: '목표' }
+      ];
+
+      return `
+        <div class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-2xl max-w-md mx-auto">
+          <div class="flex justify-around items-center p-2">
+            ${tabs.map(t => t.id === 'add' ? `
+              <button onclick="state.showAddTransaction=true;render()" class="flex flex-col items-center p-2 -mt-8">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full p-4 shadow-2xl hover:scale-110 transition transform">
+                  <i data-lucide="plus" class="w-7 h-7" style="stroke-width: 3"></i>
+                </div>
+              </button>
+            ` : `
+              <button onclick="setActiveTab('${t.id}')" class="flex flex-col items-center p-2 rounded-lg transition ${state.activeTab === t.id ? 'text-blue-600 bg-blue-50' : 'text-gray-400'}">
+                <i data-lucide="${t.icon}" class="w-6 h-6"></i>
+                <span class="text-xs mt-1 font-medium">${t.label}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function setActiveTab(tab) {
+      state.activeTab = tab;
+      render();
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      
+      if (state.isLoading) {
+        app.innerHTML = `
+          <div class="max-w-md mx-auto bg-gray-50 min-h-screen flex items-center justify-center">
+            <div class="text-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div class="text-gray-600">데이터 로딩 중...</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      let content = '';
+      if (state.activeTab === 'home') content = renderHomeScreen();
+      else if (state.activeTab === 'history') content = renderHistoryScreen();
+      else if (state.activeTab === 'stats') content = renderStatsScreen();
+      else if (state.activeTab === 'goal') content = renderGoalScreen();
+
+      app.innerHTML = `
+        ${renderHeader()}
+        <div class="pb-4">${content}</div>
+        ${renderNavbar()}
+        ${state.showAddTransaction ? renderAddTransactionModal() : ''}
+        ${state.showCompoundCalc ? renderCompoundCalc() : ''}
+        ${state.showSettings ? renderSettings() : ''}
+      `;
+
+      lucide.createIcons();
+
+      // Post-render updates
+      setTimeout(() => {
+        if (state.activeTab === 'history') {
+          updateHistoryList();
+          document.getElementById('startDate')?.addEventListener('change', updateHistoryList);
+          document.getElementById('endDate')?.addEventListener('change', updateHistoryList);
+          document.getElementById('searchKeyword')?.addEventListener('input', updateHistoryList);
+        }
+        if (state.activeTab === 'stats') updateStatsContent();
+        if (state.activeTab === 'goal') {
+          filterMemos();
+          updateEventList();
+        }
+        if (state.showSettings) updateCategoryList();
+      }, 0);
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+    });
+  </script>
+</body>
+</html>
