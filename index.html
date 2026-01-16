@@ -35,10 +35,10 @@
       usdPhases: [],
       jpyPhases: [],
       usdRate: 1380,
-      jpyRate: 9.2,
+      jpyRate: 920,
       usdNextId: 1,
       jpyNextId: 1,
-      autoSell: true,
+
       expandedPhase: null,
       showExchangeStats: false,
       exchangeStatsPeriod: 'yearly',
@@ -88,7 +88,7 @@
         state.usdPhases = exchangeData.usdPhases || [];
         state.jpyPhases = exchangeData.jpyPhases || [];
         state.usdRate = exchangeData.usdRate || 1380;
-        state.jpyRate = exchangeData.jpyRate || 9.2;
+        state.jpyRate = exchangeData.jpyRate || 920;
         state.usdNextId = exchangeData.usdNextId || 1;
         state.jpyNextId = exchangeData.jpyNextId || 1;
       }
@@ -254,7 +254,7 @@
               state.usdPhases = data.exchangeData.usdPhases || [];
               state.jpyPhases = data.exchangeData.jpyPhases || [];
               state.usdRate = data.exchangeData.usdRate || 1380;
-              state.jpyRate = data.exchangeData.jpyRate || 9.2;
+              state.jpyRate = data.exchangeData.jpyRate || 920;
               state.usdNextId = data.exchangeData.usdNextId || 1;
               state.jpyNextId = data.exchangeData.jpyNextId || 1;
             }
@@ -1615,9 +1615,10 @@
           <!-- Current Rate -->
           <div class="bg-white rounded-2xl shadow-lg p-4">
             <div class="flex flex-col items-center gap-2">
+              <div class="text-sm text-gray-500 mb-1">${state.exchangeTab === 'USD' ? '1달러당' : '100엔당'}</div>
               <div class="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 rounded-xl border-2 border-blue-200">
                 <i data-lucide="trending-up" class="w-8 h-8 text-blue-600"></i>
-                <span class="text-4xl font-bold text-blue-600" id="currentRateDisplay">${currentRate.toFixed(state.exchangeTab === 'USD' ? 1 : 2)}</span>
+                <span class="text-4xl font-bold text-blue-600" id="currentRateDisplay">${currentRate.toFixed(2)}</span>
                 <span class="text-2xl font-bold text-gray-600">원</span>
                 <button onclick="editExchangeRate()" class="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-100 rounded-lg transition">
                   <i data-lucide="edit-2" class="w-6 h-6"></i>
@@ -1690,19 +1691,7 @@
             </div>
           </div>
 
-          <!-- Auto Sell Toggle -->
-          <div class="bg-white rounded-xl shadow-lg p-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="w-3 h-3 rounded-full ${state.autoSell ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}"></div>
-                <span class="font-bold text-gray-800">자동 매도</span>
-              </div>
-              <button onclick="toggleAutoSell()" class="relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${state.autoSell ? 'bg-green-500' : 'bg-gray-300'}">
-                <span class="inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${state.autoSell ? 'translate-x-7' : 'translate-x-1'}"></span>
-              </button>
-            </div>
-            ${state.autoSell ? '<p class="text-xs text-gray-600 mt-2">💡 목표환율 +1원 도달 시 자동으로 매도됩니다</p>' : ''}
-          </div>
+
 
           <!-- Investment Status -->
           <div class="bg-white rounded-xl shadow-lg p-4">
@@ -2043,7 +2032,7 @@
         const data = await res.json();
         if (data.rates.USD && data.rates.JPY) {
           state.usdRate = Math.round((1 / data.rates.USD) * 10) / 10;
-          state.jpyRate = Math.round((1 / data.rates.JPY) * 1000) / 100;
+          state.jpyRate = Math.round((100 / data.rates.JPY) * 100) / 100;
           saveData();
           render();
           showToast('환율이 업데이트되었습니다');
@@ -2056,10 +2045,7 @@
       if (btn) btn.classList.remove('animate-spin');
     }
 
-    function toggleAutoSell() {
-      state.autoSell = !state.autoSell;
-      render();
-    }
+
 
     function toggleExchangeStats() {
       state.showExchangeStats = !state.showExchangeStats;
@@ -2089,7 +2075,7 @@
         id: state.exchangeTab === 'USD' ? state.usdNextId : state.jpyNextId,
         amount: 1000000,
         buyRate: currentRate,
-        sellRate: currentRate + (state.exchangeTab === 'USD' ? 50 : 0.5),
+        sellRate: currentRate + 1.5,
         completed: false,
         sold: false,
         date: '',
