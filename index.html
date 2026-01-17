@@ -349,6 +349,25 @@
       return num.toLocaleString();
     }
 
+    // Format input with commas
+    function formatAmountInput(input) {
+      var value = input.value.replace(/[^\d]/g, '');
+      if (value === '') {
+        input.value = '';
+        return;
+      }
+      var num = parseInt(value, 10);
+      input.value = num.toLocaleString();
+    }
+
+    // Get numeric value from formatted input
+    function getAmountValue(inputId) {
+      var input = document.getElementById(inputId);
+      if (!input) return 0;
+      var value = input.value.replace(/[^\d]/g, '');
+      return parseInt(value, 10) || 0;
+    }
+
     function getRankInfo(balance) {
       if (balance >= 500000000) return { rank: '절대강자', color: 'text-purple-600', bgColor: 'bg-purple-100', icon: '👑' };
       if (balance >= 200000000) return { rank: '소부자', color: 'text-blue-600', bgColor: 'bg-blue-100', icon: '💎' };
@@ -1727,7 +1746,10 @@
       var bankListHtml = state.bankBalances.map(function(b) {
         return '<div class="flex justify-between items-center p-3 border rounded-lg bg-gray-50">' +
           '<div><div class="font-medium">' + b.name + '</div><div class="text-sm text-gray-600">' + formatNumber(b.balance) + '원</div></div>' +
-          '<button onclick="deleteBank(' + b.id + ')" class="text-red-500 text-sm px-2 py-1 hover:bg-red-50 rounded">삭제</button>' +
+          '<div class="flex gap-1">' +
+            '<button onclick="editBank(' + b.id + ')" class="text-blue-500 text-sm px-2 py-1 hover:bg-blue-50 rounded">수정</button>' +
+            '<button onclick="deleteBank(' + b.id + ')" class="text-red-500 text-sm px-2 py-1 hover:bg-red-50 rounded">삭제</button>' +
+          '</div>' +
         '</div>';
       }).join('');
 
@@ -1830,13 +1852,13 @@
           '<h3 class="font-bold mb-4">🎯 수입 목표</h3>' +
           '<div class="space-y-3">' +
             '<div><label class="block text-sm font-medium mb-1 text-purple-700">👑 7년 목표</label>' +
-              '<input type="number" id="goal-year7" value="' + state.goals.year7 + '" class="w-full p-2 border rounded-lg" placeholder="금액 입력"></div>' +
+              '<input type="text" id="goal-year7" value="' + (state.goals.year7 ? Number(state.goals.year7).toLocaleString() : '') + '" class="w-full p-2 border rounded-lg" placeholder="금액 입력" oninput="formatAmountInput(this)"></div>' +
             '<div><label class="block text-sm font-medium mb-1 text-blue-700">💎 5년 목표</label>' +
-              '<input type="number" id="goal-year5" value="' + state.goals.year5 + '" class="w-full p-2 border rounded-lg" placeholder="금액 입력"></div>' +
+              '<input type="text" id="goal-year5" value="' + (state.goals.year5 ? Number(state.goals.year5).toLocaleString() : '') + '" class="w-full p-2 border rounded-lg" placeholder="금액 입력" oninput="formatAmountInput(this)"></div>' +
             '<div><label class="block text-sm font-medium mb-1 text-green-700">🏆 3년 목표</label>' +
-              '<input type="number" id="goal-year3" value="' + state.goals.year3 + '" class="w-full p-2 border rounded-lg" placeholder="금액 입력"></div>' +
+              '<input type="text" id="goal-year3" value="' + (state.goals.year3 ? Number(state.goals.year3).toLocaleString() : '') + '" class="w-full p-2 border rounded-lg" placeholder="금액 입력" oninput="formatAmountInput(this)"></div>' +
             '<div><label class="block text-sm font-medium mb-1 text-yellow-700">⭐ 올해 목표</label>' +
-              '<input type="number" id="goal-thisYear" value="' + state.goals.thisYear + '" class="w-full p-2 border rounded-lg" placeholder="금액 입력"></div>' +
+              '<input type="text" id="goal-thisYear" value="' + (state.goals.thisYear ? Number(state.goals.thisYear).toLocaleString() : '') + '" class="w-full p-2 border rounded-lg" placeholder="금액 입력" oninput="formatAmountInput(this)"></div>' +
             '<button onclick="saveGoals()" class="w-full bg-blue-500 text-white py-2 rounded-lg font-medium">목표 저장</button>' +
           '</div>' +
         '</div>' +
@@ -1849,7 +1871,7 @@
           '<div class="space-y-2 mb-4">' + bankListHtml + '</div>' +
           '<div class="space-y-2">' +
             '<input type="text" id="newBankName" class="w-full p-2 border rounded-lg" placeholder="은행명">' +
-            '<input type="number" id="newBankBalance" class="w-full p-2 border rounded-lg" placeholder="잔고">' +
+            '<input type="text" id="newBankBalance" class="w-full p-2 border rounded-lg" placeholder="잔고" oninput="formatAmountInput(this)">' +
             '<button onclick="addBank()" class="w-full bg-green-500 text-white py-2 rounded-lg">은행 추가</button>' +
           '</div>' +
         '</div>' +
@@ -1860,23 +1882,50 @@
 
     function saveGoals() {
       state.goals = {
-        year7: document.getElementById('goal-year7') ? document.getElementById('goal-year7').value : '',
-        year5: document.getElementById('goal-year5') ? document.getElementById('goal-year5').value : '',
-        year3: document.getElementById('goal-year3') ? document.getElementById('goal-year3').value : '',
-        thisYear: document.getElementById('goal-thisYear') ? document.getElementById('goal-thisYear').value : ''
+        year7: getAmountValue('goal-year7') || '',
+        year5: getAmountValue('goal-year5') || '',
+        year3: getAmountValue('goal-year3') || '',
+        thisYear: getAmountValue('goal-thisYear') || ''
       };
       saveData();
+      render();
       showToast('목표가 저장되었습니다');
     }
 
     function addBank() {
-      var name = document.getElementById('newBankName') ? document.getElementById('newBankName').value : '';
-      var balance = Number(document.getElementById('newBankBalance') ? document.getElementById('newBankBalance').value : 0);
-      if (!name || isNaN(balance)) { alert('은행명과 잔고를 입력해주세요'); return; }
+      var name = document.getElementById('newBankName') ? document.getElementById('newBankName').value.trim() : '';
+      var balanceStr = document.getElementById('newBankBalance') ? document.getElementById('newBankBalance').value : '0';
+      var balance = parseInt(balanceStr.replace(/[^\d]/g, ''), 10) || 0;
+      if (!name) { alert('은행명을 입력해주세요'); return; }
+      if (balance <= 0) { alert('잔고를 입력해주세요'); return; }
       state.bankBalances.push({ id: Date.now(), name: name, balance: balance });
       saveData();
       render();
       showToast('은행이 추가되었습니다');
+    }
+
+    function editBank(id) {
+      var bank = state.bankBalances.find(function(b) { return b.id === id; });
+      if (!bank) return;
+      
+      var newName = prompt('은행명:', bank.name);
+      if (newName === null) return;
+      
+      var newBalanceStr = prompt('잔고:', bank.balance.toLocaleString());
+      if (newBalanceStr === null) return;
+      
+      var newBalance = parseInt(newBalanceStr.replace(/[^\d]/g, ''), 10);
+      if (isNaN(newBalance) || newBalance < 0) {
+        alert('올바른 금액을 입력해주세요');
+        return;
+      }
+      
+      bank.name = newName.trim() || bank.name;
+      bank.balance = newBalance;
+      
+      saveData();
+      render();
+      showToast('은행 정보가 수정되었습니다');
     }
 
     function deleteBank(id) {
@@ -2319,9 +2368,9 @@
     function addInvestment() {
       var name = document.getElementById('invName') ? document.getElementById('invName').value : '';
       var type = document.getElementById('invType') ? document.getElementById('invType').value : 'stock';
-      var quantity = Number(document.getElementById('invQuantity') ? document.getElementById('invQuantity').value : 0);
-      var buyPrice = Number(document.getElementById('invBuyPrice') ? document.getElementById('invBuyPrice').value : 0);
-      var currentPrice = Number(document.getElementById('invCurrentPrice') ? document.getElementById('invCurrentPrice').value : 0) || buyPrice;
+      var quantity = getAmountValue('invQuantity');
+      var buyPrice = getAmountValue('invBuyPrice');
+      var currentPrice = getAmountValue('invCurrentPrice') || buyPrice;
 
       if (!name || !quantity || !buyPrice) {
         alert('종목명, 수량, 매입가를 입력해주세요');
@@ -2358,11 +2407,10 @@
     // Dividend functions
     function addDividend() {
       var stockNameEl = document.getElementById('divStockName');
-      var amountEl = document.getElementById('divAmount');
       var dateEl = document.getElementById('divDate');
       
       var stockName = stockNameEl ? stockNameEl.value.trim() : '';
-      var amount = Number(amountEl ? amountEl.value : 0);
+      var amount = getAmountValue('divAmount');
       var date = dateEl ? dateEl.value : '';
 
       if (!stockName) {
@@ -2488,14 +2536,17 @@
       var loan = state.loans.find(function(l) { return l.id === id; });
       if (!loan) return;
 
-      var newAmount = prompt('대출 잔액:', loan.amount);
-      if (newAmount === null) return;
+      var newAmountStr = prompt('대출 잔액:', loan.amount.toLocaleString());
+      if (newAmountStr === null) return;
       
-      var newMonthly = prompt('월 상환금:', loan.monthlyPayment);
-      if (newMonthly === null) return;
+      var newMonthlyStr = prompt('월 상환금:', loan.monthlyPayment.toLocaleString());
+      if (newMonthlyStr === null) return;
 
-      loan.amount = Number(newAmount) || loan.amount;
-      loan.monthlyPayment = Number(newMonthly) || loan.monthlyPayment;
+      var newAmount = parseInt(newAmountStr.replace(/[^\d]/g, ''), 10);
+      var newMonthly = parseInt(newMonthlyStr.replace(/[^\d]/g, ''), 10);
+
+      loan.amount = isNaN(newAmount) ? loan.amount : newAmount;
+      loan.monthlyPayment = isNaN(newMonthly) ? loan.monthlyPayment : newMonthly;
 
       saveData();
       render();
@@ -3259,7 +3310,7 @@
             '</div>' +
             '<input type="hidden" id="txType" value="expense">' +
             '<div><label class="block text-sm font-medium mb-1">날짜</label><input type="date" id="txDate" value="' + new Date().toISOString().split('T')[0] + '" class="w-full p-2 border rounded-lg"></div>' +
-            '<div><label class="block text-sm font-medium mb-1">금액</label><input type="number" id="txAmount" class="w-full p-2 border rounded-lg" placeholder="금액 입력" oninput="updateInstallmentInfo()"></div>' +
+            '<div><label class="block text-sm font-medium mb-1">금액</label><input type="text" id="txAmount" class="w-full p-2 border rounded-lg" placeholder="금액 입력" oninput="formatAmountInput(this);updateInstallmentInfo()"></div>' +
             '<div id="expense-options">' +
               '<div><label class="block text-sm font-medium mb-1">결제수단</label><select id="txPayment" onchange="toggleInstallment()" class="w-full p-2 border rounded-lg"><option value="card">카드</option><option value="cash">현금</option><option value="other">기타지불</option></select></div>' +
               '<div id="installment-div" class="mt-4"><label class="block text-sm font-medium mb-1">할부</label><select id="txInstallment" onchange="updateInstallmentInfo()" class="w-full p-2 border rounded-lg"><option value="0">일시불</option><option value="2">2개월</option><option value="3">3개월</option><option value="4">4개월</option><option value="5">5개월</option><option value="6">6개월</option><option value="7">7개월</option><option value="8">8개월</option><option value="9">9개월</option><option value="10">10개월</option><option value="11">11개월</option><option value="12">12개월</option><option value="24">24개월</option><option value="36">36개월</option><option value="48">48개월</option><option value="60">60개월</option><option value="72">72개월</option></select><div id="installment-info" class="mt-2 p-2 bg-blue-50 rounded-lg text-xs text-blue-700 hidden"></div></div>' +
@@ -3318,14 +3369,13 @@
 
     function updateInstallmentInfo() {
       var installmentSelect = document.getElementById('txInstallment');
-      var amountInput = document.getElementById('txAmount');
       var dateInput = document.getElementById('txDate');
       var infoDiv = document.getElementById('installment-info');
       
       if (!installmentSelect || !infoDiv) return;
       
       var installment = Number(installmentSelect.value);
-      var amount = Number(amountInput ? amountInput.value : 0);
+      var amount = getAmountValue('txAmount');
       var date = dateInput ? dateInput.value : '';
       
       if (installment > 1 && amount > 0) {
@@ -3345,7 +3395,7 @@
     function submitTransaction() {
       var type = document.getElementById('txType').value;
       var date = document.getElementById('txDate').value;
-      var amount = Number(document.getElementById('txAmount').value);
+      var amount = getAmountValue('txAmount');
       var category = document.getElementById('txCategory').value;
       var memo = document.getElementById('txMemo').value;
       
@@ -3451,7 +3501,7 @@
             '<div>' +
               '<label class="block text-sm font-medium mb-1 text-gray-700">배당금</label>' +
               '<div class="relative">' +
-                '<input type="number" id="divAmount" class="w-full p-3 pr-12 border rounded-lg" placeholder="0">' +
+                '<input type="text" id="divAmount" class="w-full p-3 pr-12 border rounded-lg" placeholder="0" oninput="formatAmountInput(this)">' +
                 '<span class="absolute right-3 top-3 text-gray-500">원</span>' +
               '</div>' +
             '</div>' +
@@ -3489,9 +3539,9 @@
           '<div class="p-4 space-y-4">' +
             '<div><label class="block text-sm font-medium mb-1">종목명</label><input type="text" id="invName" class="w-full p-2 border rounded-lg" placeholder="예: 삼성전자"></div>' +
             '<div><label class="block text-sm font-medium mb-1">투자 유형</label><select id="invType" class="w-full p-2 border rounded-lg"><option value="stock">📊 주식</option><option value="etf">📦 ETF</option><option value="fund">💼 펀드</option><option value="crypto">🪙 암호화폐</option><option value="gold">🥇 금</option><option value="realestate">🏠 부동산</option><option value="bond">📃 채권</option><option value="other">📄 기타</option></select></div>' +
-            '<div><label class="block text-sm font-medium mb-1">보유 수량</label><input type="number" id="invQuantity" class="w-full p-2 border rounded-lg" placeholder="0"></div>' +
-            '<div><label class="block text-sm font-medium mb-1">매입가 (1주당)</label><input type="number" id="invBuyPrice" class="w-full p-2 border rounded-lg" placeholder="0"></div>' +
-            '<div><label class="block text-sm font-medium mb-1">현재가 (1주당)</label><input type="number" id="invCurrentPrice" class="w-full p-2 border rounded-lg" placeholder="매입가와 동일시 비워두세요"></div>' +
+            '<div><label class="block text-sm font-medium mb-1">보유 수량</label><input type="text" id="invQuantity" class="w-full p-2 border rounded-lg" placeholder="0" oninput="formatAmountInput(this)"></div>' +
+            '<div><label class="block text-sm font-medium mb-1">매입가 (1주당)</label><input type="text" id="invBuyPrice" class="w-full p-2 border rounded-lg" placeholder="0" oninput="formatAmountInput(this)"></div>' +
+            '<div><label class="block text-sm font-medium mb-1">현재가 (1주당)</label><input type="text" id="invCurrentPrice" class="w-full p-2 border rounded-lg" placeholder="매입가와 동일시 비워두세요" oninput="formatAmountInput(this)"></div>' +
             '<div class="flex gap-2 pt-4">' +
               '<button onclick="addInvestment()" class="flex-1 bg-indigo-500 text-white py-3 rounded-lg font-medium">추가</button>' +
               '<button onclick="state.showAddInvestment=false;render()" class="flex-1 bg-gray-300 py-3 rounded-lg font-medium">취소</button>' +
