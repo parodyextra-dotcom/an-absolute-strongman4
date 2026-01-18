@@ -99,8 +99,10 @@
       jpyInitialBudget: 10000000,
       categories: {
         expense: ['식비', '교통비', '통신비', '생활용품', '의료비', '교육비', '문화생활', '아버지', '지환', '다혜', '다연', '보험료', '외식비', '세금공과금', '주유비', '대출상환', '기타비'],
-        income: ['급여', '이자', '대리업무', '배당금', '기타수입']
+        income: ['급여', '이자', '대리업무', '배당금', '기타수입'],
+        fixedExpense: ['보험료', '지환', '다혜', '부모님', '기타비']
       },
+      fixedExpenses: [],
       undoStack: [],
       showAddTransaction: false,
       showCompoundCalc: false,
@@ -211,6 +213,75 @@
       }
     }
 
+    // Check and add automatic fixed expenses
+    function checkAutoFixedExpenses() {
+      var today = new Date();
+      var currentYear = today.getFullYear();
+      var currentMonth = today.getMonth();
+      var currentDay = today.getDate();
+      var totalAdded = 0;
+      
+      state.fixedExpenses.forEach(function(fe) {
+        if (!fe.active) return;
+        
+        var startDate = new Date(fe.startDate);
+        var endDate = fe.endDate ? new Date(fe.endDate) : new Date('2099-12-31');
+        
+        // 시작일부터 현재까지 또는 종료일까지의 모든 월 체크
+        var checkDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+        var endCheckDate = new Date(Math.min(today.getTime(), endDate.getTime()));
+        
+        while (checkDate <= endCheckDate) {
+          var checkYear = checkDate.getFullYear();
+          var checkMonth = checkDate.getMonth();
+          
+          // 현재 달이거나 지난 달인 경우에만 처리
+          if (checkYear < currentYear || (checkYear === currentYear && checkMonth <= currentMonth)) {
+            // 해당 월의 출금일
+            var paymentDate = new Date(checkYear, checkMonth, fe.payDay);
+            
+            // 시작일 이후이고 종료일 이전인 경우에만
+            if (paymentDate >= startDate && paymentDate <= endDate) {
+              var dateString = paymentDate.toISOString().split('T')[0];
+              
+              // 이미 입력된 거래가 있는지 확인
+              var existingTransaction = state.transactions.find(function(t) {
+                return t.fixedExpenseId === fe.id && t.date === dateString;
+              });
+              
+              if (!existingTransaction) {
+                // 오늘 이전이거나 오늘이고 출금일이 지났으면 입력
+                if (paymentDate < today || (checkYear === currentYear && checkMonth === currentMonth && currentDay >= fe.payDay)) {
+                  var newTransaction = {
+                    id: Date.now() + Math.random(),
+                    type: 'expense',
+                    date: dateString,
+                    amount: fe.amount,
+                    category: fe.category,
+                    memo: fe.memo ? fe.memo + ' (고정비)' : '고정비',
+                    paymentMethod: fe.paymentMethod,
+                    installment: 0,
+                    isNecessary: true,
+                    fixedExpenseId: fe.id
+                  };
+                  state.transactions.push(newTransaction);
+                  totalAdded++;
+                }
+              }
+            }
+          }
+          
+          // 다음 달로 이동
+          checkDate.setMonth(checkDate.getMonth() + 1);
+        }
+      });
+      
+      if (totalAdded > 0) {
+        saveData();
+        showToast(totalAdded + '건의 고정비가 자동 입력되었습니다');
+      }
+    }
+
     // Check and add automatic loan repayments
     function checkAutoLoanRepayments() {
       var today = new Date();
@@ -279,6 +350,7 @@
       state.dividends = storage.get('dividends') || [];
       state.investmentJournals = storage.get('investmentJournals') || [];
       state.loans = storage.get('loans') || [];
+      state.fixedExpenses = storage.get('fixedExpenses') || [];
       state.categories = storage.get('categories') || state.categories;
       var exchangeData = storage.get('exchangeData');
       if (exchangeData) {
@@ -299,6 +371,9 @@
       // Check for automatic loan repayments
       checkAutoLoanRepayments();
       
+      // Check for automatic fixed expenses
+      checkAutoFixedExpenses();
+      
       render();
     }
 
@@ -313,6 +388,7 @@
       storage.set('dividends', state.dividends);
       storage.set('investmentJournals', state.investmentJournals);
       storage.set('loans', state.loans);
+      storage.set('fixedExpenses', state.fixedExpenses);
       storage.set('categories', state.categories);
       storage.set('exchangeData', {
         usdPhases: state.usdPhases,
@@ -666,6 +742,61 @@
 
     // History Screen
     function renderHistoryScreen() {
+      // 월 고정비 섹션 생성
+      var activeFixedExpenses = state.fixedExpenses.filter(function(fe) { return fe.active; });
+      var inactiveFixedExpenses = state.fixedExpenses.filter(function(fe) { return !fe.active; });
+      var totalMonthlyFixed = activeFixedExpenses.reduce(function(sum, fe) { return sum + fe.amount; }, 0);
+      
+      var fixedExpenseHtml = '<div class="bg-white rounded-xl shadow-lg p-4 mb-4">' +
+        '<div class="flex justify-between items-center mb-3">' +
+          '<h3 class="font-bold text-purple-700">📅 월 고정비</h3>' +
+          '<div class="bg-purple-100 px-3 py-1 rounded-lg">' +
+            '<span class="text-sm text-purple-600">월 합계: </span>' +
+            '<span class="font-bold text-purple-700">' + formatNumber(totalMonthlyFixed) + '원</span>' +
+          '</div>' +
+        '</div>';
+      
+      if (activeFixedExpenses.length === 0 && inactiveFixedExpenses.length === 0) {
+        fixedExpenseHtml += '<div class="text-center text-gray-400 py-4">등록된 고정비가 없습니다.<br><span class="text-sm">거래 추가에서 "고정비" 체크 후 등록하세요.</span></div>';
+      } else {
+        if (activeFixedExpenses.length > 0) {
+          fixedExpenseHtml += '<div class="space-y-2 mb-3">';
+          activeFixedExpenses.forEach(function(fe) {
+            var payMethodLabel = fe.paymentMethod === 'card' ? '카드' : fe.paymentMethod === 'cash' ? '현금' : '기타';
+            fixedExpenseHtml += '<div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg border border-purple-200">' +
+              '<div class="flex-1">' +
+                '<div class="font-medium text-gray-800">' + fe.category + ' <span class="text-xs text-gray-500">(' + payMethodLabel + ')</span></div>' +
+                '<div class="text-xs text-gray-500">매월 ' + fe.payDay + '일 | ' + fe.startDate + ' ~ ' + (fe.endDate || '무기한') + '</div>' +
+                (fe.memo ? '<div class="text-xs text-gray-400 mt-1">' + fe.memo + '</div>' : '') +
+              '</div>' +
+              '<div class="text-right">' +
+                '<div class="font-bold text-purple-600">' + formatNumber(fe.amount) + '원</div>' +
+                '<div class="flex gap-1 mt-1">' +
+                  '<button onclick="editFixedExpense(' + fe.id + ')" class="text-xs text-blue-500 px-2 py-0.5 hover:bg-blue-50 rounded">수정</button>' +
+                  '<button onclick="deleteFixedExpense(' + fe.id + ')" class="text-xs text-red-500 px-2 py-0.5 hover:bg-red-50 rounded">종료</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+          });
+          fixedExpenseHtml += '</div>';
+        }
+        
+        if (inactiveFixedExpenses.length > 0) {
+          fixedExpenseHtml += '<div class="border-t pt-3 mt-3">' +
+            '<div class="text-xs text-gray-500 mb-2">종료된 고정비 (' + inactiveFixedExpenses.length + '건)</div>' +
+            '<div class="space-y-1">';
+          inactiveFixedExpenses.forEach(function(fe) {
+            fixedExpenseHtml += '<div class="flex justify-between items-center p-2 bg-gray-50 rounded-lg opacity-60">' +
+              '<div class="text-sm text-gray-600">' + fe.category + ' - ' + formatNumber(fe.amount) + '원</div>' +
+              '<button onclick="permanentDeleteFixedExpense(' + fe.id + ')" class="text-xs text-red-400 px-2">삭제</button>' +
+            '</div>';
+          });
+          fixedExpenseHtml += '</div></div>';
+        }
+      }
+      
+      fixedExpenseHtml += '</div>';
+      
       return '<div class="p-4" id="history-screen">' +
         '<div class="mb-4 space-y-2">' +
           '<div class="grid grid-cols-2 gap-2">' +
@@ -674,6 +805,7 @@
           '</div>' +
           '<input type="text" id="searchKeyword" class="w-full p-2 border rounded" placeholder="키워드 검색">' +
         '</div>' +
+        fixedExpenseHtml +
         '<div class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">' +
           '<button onclick="setHistoryPeriod(\'daily\')" class="period-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-blue-500 text-white shadow-md" data-period="daily">일별</button>' +
           '<button onclick="setHistoryPeriod(\'weekly\')" class="period-btn px-4 py-2 rounded-lg whitespace-nowrap transition bg-gray-200" data-period="weekly">주별</button>' +
@@ -3309,8 +3441,35 @@
               '<button id="btn-income" onclick="setTxType(\'income\')" class="flex-1 py-2 rounded-lg bg-gray-200">수입</button>' +
             '</div>' +
             '<input type="hidden" id="txType" value="expense">' +
-            '<div><label class="block text-sm font-medium mb-1">날짜</label><input type="date" id="txDate" value="' + new Date().toISOString().split('T')[0] + '" class="w-full p-2 border rounded-lg"></div>' +
-            '<div><label class="block text-sm font-medium mb-1">금액</label><input type="text" id="txAmount" class="w-full p-2 border rounded-lg" placeholder="금액 입력" oninput="formatAmountInput(this);updateInstallmentInfo()"></div>' +
+            '<div id="fixed-expense-toggle" class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-200">' +
+              '<input type="checkbox" id="isFixedExpense" onchange="toggleFixedExpenseMode()" class="w-5 h-5 text-purple-600">' +
+              '<label for="isFixedExpense" class="font-medium text-purple-700 cursor-pointer">📅 고정비 (매월 자동 입력)</label>' +
+            '</div>' +
+            '<div id="regular-expense-form">' +
+              '<div class="mb-4"><label class="block text-sm font-medium mb-1">날짜</label><input type="date" id="txDate" value="' + new Date().toISOString().split('T')[0] + '" class="w-full p-2 border rounded-lg"></div>' +
+              '<div class="mb-4"><label class="block text-sm font-medium mb-1">금액</label><input type="text" id="txAmount" class="w-full p-2 border rounded-lg" placeholder="금액 입력" oninput="formatAmountInput(this);updateInstallmentInfo()"></div>' +
+            '</div>' +
+            '<div id="fixed-expense-form" class="hidden space-y-3">' +
+              '<div class="grid grid-cols-2 gap-2">' +
+                '<div><label class="block text-sm font-medium mb-1">시작날짜</label><input type="date" id="feStartDate" value="' + new Date().toISOString().split('T')[0] + '" class="w-full p-2 border rounded-lg"></div>' +
+                '<div><label class="block text-sm font-medium mb-1">종료날짜</label><input type="date" id="feEndDate" class="w-full p-2 border rounded-lg"></div>' +
+              '</div>' +
+              '<div class="grid grid-cols-2 gap-2">' +
+                '<div><label class="block text-sm font-medium mb-1">매월 출금일</label><select id="fePayDay" class="w-full p-2 border rounded-lg">' +
+                  Array.from({length: 28}, function(_, i) { return '<option value="' + (i + 1) + '">' + (i + 1) + '일</option>'; }).join('') +
+                '</select></div>' +
+                '<div><label class="block text-sm font-medium mb-1">매월 금액</label><input type="text" id="feAmount" class="w-full p-2 border rounded-lg" placeholder="금액" oninput="formatAmountInput(this)"></div>' +
+              '</div>' +
+              '<div><label class="block text-sm font-medium mb-1">결제수단</label><select id="fePaymentMethod" class="w-full p-2 border rounded-lg"><option value="card">카드</option><option value="cash">현금</option><option value="other">기타지불</option></select></div>' +
+              '<div><label class="block text-sm font-medium mb-1">카테고리</label><select id="feCategory" class="w-full p-2 border rounded-lg">' +
+                '<option value="">선택하세요</option>' +
+                (state.categories.fixedExpense || []).map(function(c) { return '<option value="' + c + '">' + c + '</option>'; }).join('') +
+              '</select></div>' +
+              '<div><label class="block text-sm font-medium mb-1">메모</label><input type="text" id="feMemo" class="w-full p-2 border rounded-lg" placeholder="메모 입력"></div>' +
+              '<div class="bg-purple-100 p-3 rounded-lg text-sm text-purple-700">' +
+                '💡 고정비는 시작날짜부터 종료날짜까지 매월 출금일에 자동으로 지출이 입력됩니다.' +
+              '</div>' +
+            '</div>' +
             '<div id="expense-options">' +
               '<div><label class="block text-sm font-medium mb-1">결제수단</label><select id="txPayment" onchange="toggleInstallment()" class="w-full p-2 border rounded-lg"><option value="card">카드</option><option value="cash">현금</option><option value="other">기타지불</option></select></div>' +
               '<div id="installment-div" class="mt-4"><label class="block text-sm font-medium mb-1">할부</label><select id="txInstallment" onchange="updateInstallmentInfo()" class="w-full p-2 border rounded-lg"><option value="0">일시불</option><option value="2">2개월</option><option value="3">3개월</option><option value="4">4개월</option><option value="5">5개월</option><option value="6">6개월</option><option value="7">7개월</option><option value="8">8개월</option><option value="9">9개월</option><option value="10">10개월</option><option value="11">11개월</option><option value="12">12개월</option><option value="24">24개월</option><option value="36">36개월</option><option value="48">48개월</option><option value="60">60개월</option><option value="72">72개월</option></select><div id="installment-info" class="mt-2 p-2 bg-blue-50 rounded-lg text-xs text-blue-700 hidden"></div></div>' +
@@ -3335,6 +3494,105 @@
 
     var currentTxType = 'expense';
     var isNecessary = true;
+    var isFixedExpenseMode = false;
+
+    function toggleFixedExpenseMode() {
+      isFixedExpenseMode = document.getElementById('isFixedExpense').checked;
+      var regularForm = document.getElementById('regular-expense-form');
+      var fixedForm = document.getElementById('fixed-expense-form');
+      var expenseOptions = document.getElementById('expense-options');
+      var categoryDiv = document.querySelector('#txCategory').parentElement;
+      var memoDiv = document.querySelector('#txMemo').parentElement;
+      
+      if (isFixedExpenseMode) {
+        regularForm.classList.add('hidden');
+        fixedForm.classList.remove('hidden');
+        expenseOptions.classList.add('hidden');
+        categoryDiv.classList.add('hidden');
+        memoDiv.classList.add('hidden');
+      } else {
+        regularForm.classList.remove('hidden');
+        fixedForm.classList.add('hidden');
+        expenseOptions.classList.remove('hidden');
+        categoryDiv.classList.remove('hidden');
+        memoDiv.classList.remove('hidden');
+      }
+    }
+
+    function submitFixedExpense() {
+      var startDate = document.getElementById('feStartDate').value;
+      var endDate = document.getElementById('feEndDate').value;
+      var payDay = parseInt(document.getElementById('fePayDay').value);
+      var amount = getAmountValue('feAmount');
+      var paymentMethod = document.getElementById('fePaymentMethod').value;
+      var category = document.getElementById('feCategory').value;
+      var memo = document.getElementById('feMemo').value;
+
+      if (!startDate) { alert('시작날짜를 선택해주세요'); return false; }
+      if (!amount || amount <= 0) { alert('금액을 입력해주세요'); return false; }
+      if (!category) { alert('카테고리를 선택해주세요'); return false; }
+
+      var newFixedExpense = {
+        id: Date.now(),
+        startDate: startDate,
+        endDate: endDate || null,
+        payDay: payDay,
+        amount: amount,
+        paymentMethod: paymentMethod,
+        category: category,
+        memo: memo,
+        active: true,
+        createdAt: new Date().toISOString()
+      };
+
+      state.fixedExpenses.push(newFixedExpense);
+      saveData();
+      
+      // 즉시 자동 입력 실행
+      checkAutoFixedExpenses();
+      
+      return true;
+    }
+
+    function editFixedExpense(id) {
+      var fe = state.fixedExpenses.find(function(f) { return f.id === id; });
+      if (!fe) return;
+      
+      var newAmount = prompt('매월 금액:', fe.amount.toLocaleString());
+      if (newAmount === null) return;
+      
+      var newEndDate = prompt('종료날짜 (YYYY-MM-DD, 비워두면 무기한):', fe.endDate || '');
+      if (newEndDate === null) return;
+      
+      fe.amount = parseInt(newAmount.replace(/[^\d]/g, ''), 10) || fe.amount;
+      fe.endDate = newEndDate || null;
+      
+      saveData();
+      render();
+      showToast('고정비가 수정되었습니다');
+    }
+
+    function deleteFixedExpense(id) {
+      if (confirm('이 고정비를 종료하시겠습니까?')) {
+        var fe = state.fixedExpenses.find(function(f) { return f.id === id; });
+        if (fe) {
+          fe.active = false;
+          fe.endDate = new Date().toISOString().split('T')[0];
+        }
+        saveData();
+        render();
+        showToast('고정비가 종료되었습니다');
+      }
+    }
+
+    function permanentDeleteFixedExpense(id) {
+      if (confirm('이 고정비를 완전히 삭제하시겠습니까? (관련 거래 내역은 유지됩니다)')) {
+        state.fixedExpenses = state.fixedExpenses.filter(function(f) { return f.id !== id; });
+        saveData();
+        render();
+        showToast('고정비가 삭제되었습니다');
+      }
+    }
 
     function setTxType(type) {
       currentTxType = type;
@@ -3342,6 +3600,23 @@
       document.getElementById('btn-expense').className = type === 'expense' ? 'flex-1 py-2 rounded-lg bg-red-500 text-white' : 'flex-1 py-2 rounded-lg bg-gray-200';
       document.getElementById('btn-income').className = type === 'income' ? 'flex-1 py-2 rounded-lg bg-green-500 text-white' : 'flex-1 py-2 rounded-lg bg-gray-200';
       document.getElementById('expense-options').style.display = type === 'expense' ? 'block' : 'none';
+      
+      // 고정비 토글 표시/숨김
+      var fixedExpenseToggle = document.getElementById('fixed-expense-toggle');
+      if (fixedExpenseToggle) {
+        fixedExpenseToggle.style.display = type === 'expense' ? 'flex' : 'none';
+      }
+      
+      // 수입 선택시 고정비 모드 해제
+      if (type === 'income') {
+        var checkbox = document.getElementById('isFixedExpense');
+        if (checkbox && checkbox.checked) {
+          checkbox.checked = false;
+          isFixedExpenseMode = false;
+          document.getElementById('regular-expense-form').classList.remove('hidden');
+          document.getElementById('fixed-expense-form').classList.add('hidden');
+        }
+      }
       
       var catSelect = document.getElementById('txCategory');
       catSelect.innerHTML = '<option value="">선택하세요</option>' + state.categories[type].map(function(c) { return '<option value="' + c + '">' + c + '</option>'; }).join('');
@@ -3393,6 +3668,17 @@
     }
 
     function submitTransaction() {
+      // 고정비 모드인 경우
+      if (isFixedExpenseMode) {
+        if (submitFixedExpense()) {
+          state.showAddTransaction = false;
+          isFixedExpenseMode = false;
+          render();
+          showToast('고정비가 등록되었습니다');
+        }
+        return;
+      }
+      
       var type = document.getElementById('txType').value;
       var date = document.getElementById('txDate').value;
       var amount = getAmountValue('txAmount');
@@ -3604,6 +3890,13 @@
         return '<div class="flex justify-between items-center p-2 border rounded bg-gray-50">' +
           '<span>' + c + '</span>' +
           '<button onclick="deleteCategory(\'' + currentCatType + '\',' + i + ')" class="text-red-500 text-sm px-2">삭제</button>' +
+        '</div>';
+      }).join('');
+      
+      var fixedCategoryListHtml = (state.categories.fixedExpense || []).map(function(c, i) {
+        return '<div class="flex justify-between items-center p-2 border rounded bg-purple-50">' +
+          '<span>' + c + '</span>' +
+          '<button onclick="deleteFixedCategory(' + i + ')" class="text-red-500 text-sm px-2">삭제</button>' +
         '</div>';
       }).join('');
 
