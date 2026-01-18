@@ -444,6 +444,25 @@
       return parseInt(value, 10) || 0;
     }
 
+    // Format quantity input (allows decimal)
+    function formatQuantityInput(input) {
+      var value = input.value.replace(/[^\d.]/g, '');
+      // Only allow one decimal point
+      var parts = value.split('.');
+      if (parts.length > 2) {
+        value = parts[0] + '.' + parts.slice(1).join('');
+      }
+      input.value = value;
+    }
+
+    // Get quantity value (allows decimal)
+    function getQuantityValue(inputId) {
+      var input = document.getElementById(inputId);
+      if (!input) return 0;
+      var value = input.value.replace(/[^\d.]/g, '');
+      return parseFloat(value) || 0;
+    }
+
     function getRankInfo(balance) {
       if (balance >= 500000000) return { rank: '절대강자', color: 'text-purple-600', bgColor: 'bg-purple-100', icon: '👑' };
       if (balance >= 200000000) return { rank: '소부자', color: 'text-blue-600', bgColor: 'bg-blue-100', icon: '💎' };
@@ -2120,7 +2139,7 @@
                   '<span class="font-bold">' + inv.name + '</span>' +
                   '<span class="text-xs bg-gray-200 px-2 py-0.5 rounded">' + label + '</span>' +
                 '</div>' +
-                '<div class="text-sm text-gray-500 mt-1">' + inv.quantity + '주 보유</div>' +
+                '<div class="text-sm text-gray-500 mt-1">' + (Number.isInteger(inv.quantity) ? inv.quantity : inv.quantity.toFixed(4)) + '주 보유</div>' +
               '</div>' +
               '<div class="text-right">' +
                 '<div class="font-bold ' + (profit >= 0 ? 'text-red-600' : 'text-blue-600') + '">' + (profit >= 0 ? '+' : '') + formatNumber(profit) + '원</div>' +
@@ -2301,7 +2320,7 @@
                   '<span class="font-bold">' + inv.name + '</span>' +
                   '<span class="text-xs bg-gray-200 px-2 py-0.5 rounded">' + label + '</span>' +
                 '</div>' +
-                '<div class="text-sm text-gray-500 mt-1">' + inv.quantity + '주 보유</div>' +
+                '<div class="text-sm text-gray-500 mt-1">' + (Number.isInteger(inv.quantity) ? inv.quantity : inv.quantity.toFixed(4)) + '주 보유</div>' +
               '</div>' +
               '<div class="text-right">' +
                 '<div class="font-bold ' + (profit >= 0 ? 'text-red-600' : 'text-blue-600') + '">' + (profit >= 0 ? '+' : '') + formatNumber(profit) + '원</div>' +
@@ -2500,7 +2519,7 @@
     function addInvestment() {
       var name = document.getElementById('invName') ? document.getElementById('invName').value : '';
       var type = document.getElementById('invType') ? document.getElementById('invType').value : 'stock';
-      var quantity = getAmountValue('invQuantity');
+      var quantity = getQuantityValue('invQuantity');
       var buyPrice = getAmountValue('invBuyPrice');
       var currentPrice = getAmountValue('invCurrentPrice') || buyPrice;
 
@@ -3825,7 +3844,7 @@
           '<div class="p-4 space-y-4">' +
             '<div><label class="block text-sm font-medium mb-1">종목명</label><input type="text" id="invName" class="w-full p-2 border rounded-lg" placeholder="예: 삼성전자"></div>' +
             '<div><label class="block text-sm font-medium mb-1">투자 유형</label><select id="invType" class="w-full p-2 border rounded-lg"><option value="stock">📊 주식</option><option value="etf">📦 ETF</option><option value="fund">💼 펀드</option><option value="crypto">🪙 암호화폐</option><option value="gold">🥇 금</option><option value="realestate">🏠 부동산</option><option value="bond">📃 채권</option><option value="other">📄 기타</option></select></div>' +
-            '<div><label class="block text-sm font-medium mb-1">보유 수량</label><input type="text" id="invQuantity" class="w-full p-2 border rounded-lg" placeholder="0" oninput="formatAmountInput(this)"></div>' +
+            '<div><label class="block text-sm font-medium mb-1">보유 수량</label><input type="text" id="invQuantity" class="w-full p-2 border rounded-lg" placeholder="0 (소수점 가능)" oninput="formatQuantityInput(this)"></div>' +
             '<div><label class="block text-sm font-medium mb-1">매입가 (1주당)</label><input type="text" id="invBuyPrice" class="w-full p-2 border rounded-lg" placeholder="0" oninput="formatAmountInput(this)"></div>' +
             '<div><label class="block text-sm font-medium mb-1">현재가 (1주당)</label><input type="text" id="invCurrentPrice" class="w-full p-2 border rounded-lg" placeholder="매입가와 동일시 비워두세요" oninput="formatAmountInput(this)"></div>' +
             '<div class="flex gap-2 pt-4">' +
