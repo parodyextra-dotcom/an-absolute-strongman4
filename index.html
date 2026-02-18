@@ -57,15 +57,114 @@
       width: 100%;
       border: none;
     }
+
+    /* ===== NEW: Golden flash for buy timing ===== */
+    @keyframes goldenFlash {
+      0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.4), 0 0 10px rgba(255, 215, 0, 0.2); border-color: rgba(255, 215, 0, 0.6); }
+      50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.2); border-color: rgba(255, 215, 0, 1); background: linear-gradient(135deg, rgba(255, 250, 205, 0.3), rgba(255, 215, 0, 0.15)); }
+      100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.4), 0 0 10px rgba(255, 215, 0, 0.2); border-color: rgba(255, 215, 0, 0.6); }
+    }
+    .golden-flash {
+      animation: goldenFlash 1.2s ease-in-out infinite;
+      border: 2px solid gold !important;
+    }
+    .golden-flash-badge {
+      animation: goldenBadgeFlash 1s ease-in-out infinite;
+    }
+    @keyframes goldenBadgeFlash {
+      0%, 100% { opacity: 0.7; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    /* ===== NEW: Green flash for sell timing ===== */
+    @keyframes greenFlash {
+      0% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.4), 0 0 10px rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.6); }
+      50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.8), 0 0 40px rgba(34, 197, 94, 0.4), 0 0 60px rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 1); background: linear-gradient(135deg, rgba(220, 252, 231, 0.4), rgba(34, 197, 94, 0.12)); }
+      100% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.4), 0 0 10px rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.6); }
+    }
+    .green-flash {
+      animation: greenFlash 1.2s ease-in-out infinite;
+      border: 2px solid #22c55e !important;
+    }
+    .green-flash-badge {
+      animation: greenBadgeFlash 1s ease-in-out infinite;
+    }
+    @keyframes greenBadgeFlash {
+      0%, 100% { opacity: 0.7; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    /* Rate card enhanced styling */
+    .rate-card-glow {
+      background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 50%, #f5f3ff 100%);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08), 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    /* Enhanced card hover */
+    .card-hover { transition: all 0.2s ease; }
+    .card-hover:active { transform: scale(0.98); }
+
+    /* Glass morphism effect */
+    .glass {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Chart modal fullscreen */
+    .chart-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 9999;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      flex-direction: column;
+      animation: modalFadeIn 0.25s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .chart-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      flex-shrink: 0;
+    }
+    .chart-modal-body {
+      flex: 1;
+      overflow: hidden;
+      background: #fff;
+    }
+    .chart-modal-body iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-gray-50">
 
   <!-- Top Header Bar -->
-  <header id="topBar" class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+  <header id="topBar" class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white shadow-lg">
     <div class="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
           <span class="text-lg font-black">$</span>
         </div>
         <h1 class="text-lg font-extrabold tracking-tight">절대강자 분할환전</h1>
@@ -82,7 +181,7 @@
   </main>
 
   <!-- Bottom Navigation Bar -->
-  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] bottom-nav">
+  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] bottom-nav">
     <div class="max-w-md mx-auto grid grid-cols-5">
       <button onclick="switchPage('home')" id="nav-home" class="nav-btn flex flex-col items-center py-2 pt-3 gap-0.5 transition-all">
         <i data-lucide="home" class="w-5 h-5"></i>
@@ -94,15 +193,15 @@
       </button>
       <button onclick="switchPage('invest')" id="nav-invest" class="nav-btn flex flex-col items-center py-2 pt-3 gap-0.5 transition-all">
         <i data-lucide="wallet" class="w-5 h-5"></i>
-        <span class="text-[10px] font-semibold">투자</span>
-      </button>
-      <button onclick="switchPage('calc')" id="nav-calc" class="nav-btn flex flex-col items-center py-2 pt-3 gap-0.5 transition-all">
-        <i data-lucide="calculator" class="w-5 h-5"></i>
-        <span class="text-[10px] font-semibold">계산</span>
+        <span class="text-[10px] font-semibold">환전</span>
       </button>
       <button onclick="switchPage('stats')" id="nav-stats" class="nav-btn flex flex-col items-center py-2 pt-3 gap-0.5 transition-all">
         <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
         <span class="text-[10px] font-semibold">통계</span>
+      </button>
+      <button onclick="switchPage('calc')" id="nav-calc" class="nav-btn flex flex-col items-center py-2 pt-3 gap-0.5 transition-all">
+        <i data-lucide="calculator" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold">계산</span>
       </button>
     </div>
   </nav>
@@ -136,12 +235,18 @@
       isLoadingRate: false,
       lastUpdated: null,
       soldItemsVisible: 10,
-      autoSell: true,
+      autoSell: false,
       initialBudget: 10000000,
+      isEditingBudget: false,
       // Calculator state
       calcDirection: 'krwToForeign',
       calcAmount: '',
-      calcCurrency: 'USD'
+      calcCurrency: 'USD',
+      // NEW: Target buy rates per currency
+      targetBuyRate_USD: '',
+      targetBuyRate_JPY: '',
+      targetBuyRate_EUR: '',
+      targetBuyRate_CNY: ''
     };
 
     // ==========================================
@@ -212,9 +317,17 @@
     const fmtMan = (n) => (n / 10000).toFixed(1) + '만';
     const fmtManInt = (n) => Math.round(n / 10000) + '만원';
 
+    // Target buy rate helpers
+    function getTargetBuyRate(currency) {
+      const val = state[`targetBuyRate_${currency || state.activeTab}`];
+      return val !== '' ? parseFloat(val) : null;
+    }
+    function setTargetBuyRate(currency, value) {
+      state[`targetBuyRate_${currency}`] = value;
+      saveToStorage();
+    }
+
     // JPY: amount is in KRW, buyRate is per 100 JPY
-    // So foreign = (amount / buyRate) * 100  (i.e. amount in JPY)
-    // KRW value = (foreignJPY / 100) * currentRate
     function getForeignAmount(amount, buyRate, currency) {
       if (currency === 'JPY') return (amount / buyRate) * 100;
       return amount / buyRate;
@@ -235,7 +348,7 @@
         const data = await res.json();
         if (data.rates) {
           if (data.rates.USD) state.usdRate = Math.round((1 / data.rates.USD) * 10) / 10;
-          if (data.rates.JPY) state.jpyRate = Math.round((100 / data.rates.JPY) * 100) / 100; // 100엔당
+          if (data.rates.JPY) state.jpyRate = Math.round((100 / data.rates.JPY) * 100) / 100;
           if (data.rates.EUR) state.eurRate = Math.round((1 / data.rates.EUR) * 100) / 100;
           if (data.rates.CNY) state.cnyRate = Math.round((1 / data.rates.CNY) * 100) / 100;
           state.lastUpdated = new Date();
@@ -249,18 +362,11 @@
     }
 
     // ==========================================
-    // AUTO SELL CHECK
+    // AUTO SELL CHECK (DISABLED)
     // ==========================================
     function checkAutoSell() {
-      if (state.autoSell) {
-        const phases = getPhases();
-        const currentRate = getCurrentRate();
-        phases.forEach(p => {
-          if (p.completed && !p.sold && currentRate >= p.sellRate + 1) {
-            toggleSold(p.id);
-          }
-        });
-      }
+      // 자동매도 비활성화
+      return;
     }
 
     // ==========================================
@@ -279,7 +385,12 @@
         usdRate: state.usdRate,
         jpyRate: state.jpyRate,
         eurRate: state.eurRate,
-        cnyRate: state.cnyRate
+        cnyRate: state.cnyRate,
+        initialBudget: state.initialBudget,
+        targetBuyRate_USD: state.targetBuyRate_USD,
+        targetBuyRate_JPY: state.targetBuyRate_JPY,
+        targetBuyRate_EUR: state.targetBuyRate_EUR,
+        targetBuyRate_CNY: state.targetBuyRate_CNY
       };
       localStorage.setItem('currencyPortfolio', JSON.stringify(data));
     }
@@ -299,11 +410,16 @@
           if (data.cnyNextId) state.cnyNextId = data.cnyNextId;
           if (data.usdRate) state.usdRate = data.usdRate;
           if (data.jpyRate) {
-            // Migration: if old jpyRate was per 1 JPY (< 20), convert to per 100 JPY
             state.jpyRate = data.jpyRate < 20 ? data.jpyRate * 100 : data.jpyRate;
           }
           if (data.eurRate) state.eurRate = data.eurRate;
           if (data.cnyRate) state.cnyRate = data.cnyRate;
+          if (data.initialBudget !== undefined) state.initialBudget = data.initialBudget;
+          // Load target buy rates
+          if (data.targetBuyRate_USD !== undefined) state.targetBuyRate_USD = data.targetBuyRate_USD;
+          if (data.targetBuyRate_JPY !== undefined) state.targetBuyRate_JPY = data.targetBuyRate_JPY;
+          if (data.targetBuyRate_EUR !== undefined) state.targetBuyRate_EUR = data.targetBuyRate_EUR;
+          if (data.targetBuyRate_CNY !== undefined) state.targetBuyRate_CNY = data.targetBuyRate_CNY;
         } catch (e) {
           console.error(e);
         }
@@ -314,6 +430,14 @@
     // ACTIONS (Phase management)
     // ==========================================
     function addPhase() {
+      // 초기예산 체크
+      const allPhases = [...state.usdPhases, ...state.jpyPhases, ...state.eurPhases, ...state.cnyPhases];
+      const totalInvested = allPhases.filter(p => p.completed && !p.sold).reduce((s, p) => s + p.amount, 0);
+      const defaultAmount = 1000000;
+      if (totalInvested + defaultAmount > state.initialBudget) {
+        alert(`초기예산(${fmt(state.initialBudget)}원)을 초과하여 매수할 수 없습니다.\n현재 투자중: ${fmt(totalInvested)}원\n남은 예산: ${fmt(state.initialBudget - totalInvested)}원`);
+        return;
+      }
       const currentRate = getCurrentRate();
       const nextId = getNextId();
       const newPhase = {
@@ -348,6 +472,16 @@
     }
 
     function toggleComplete(id) {
+      const phase = getPhases().find(p => p.id === id);
+      if (phase && !phase.completed) {
+        // 매수 완료 시 초기예산 체크
+        const allPhases = [...state.usdPhases, ...state.jpyPhases, ...state.eurPhases, ...state.cnyPhases];
+        const totalInvested = allPhases.filter(p => p.completed && !p.sold).reduce((s, p) => s + p.amount, 0);
+        if (totalInvested + phase.amount > state.initialBudget) {
+          alert(`초기예산(${fmt(state.initialBudget)}원)을 초과하여 매수할 수 없습니다.\n현재 투자중: ${fmt(totalInvested)}원\n이 건 금액: ${fmt(phase.amount)}원\n남은 예산: ${fmt(state.initialBudget - totalInvested)}원`);
+          return;
+        }
+      }
       setPhases(getPhases().map(p => p.id === id ? {
         ...p,
         completed: !p.completed,
@@ -384,7 +518,6 @@
         p.sold && p.sellDate && new Date(p.sellDate).getFullYear() === year
       );
       const totalInv = allSold.reduce((s, p) => s + p.amount, 0);
-      // For JPY phases, profit calc is different since rates are per 100 JPY
       const totalProf = allSold.reduce((s, p) => {
         const cur = getCurrencyOfPhase(p);
         const foreignAmt = getForeignAmount(p.amount, p.buyRate, cur);
@@ -405,13 +538,11 @@
       return { ...gradeInfo, totalProfit: totalProf, totalInvested: totalInv, returnRate: rate };
     }
 
-    // Determine which currency a phase belongs to
     function getCurrencyOfPhase(phase) {
       if (state.usdPhases.includes(phase)) return 'USD';
       if (state.jpyPhases.includes(phase)) return 'JPY';
       if (state.eurPhases.includes(phase)) return 'EUR';
       if (state.cnyPhases.includes(phase)) return 'CNY';
-      // fallback: check by searching
       if (state.usdPhases.find(p => p.id === phase.id && p.amount === phase.amount)) return 'USD';
       if (state.jpyPhases.find(p => p.id === phase.id && p.amount === phase.amount)) return 'JPY';
       if (state.eurPhases.find(p => p.id === phase.id && p.amount === phase.amount)) return 'EUR';
@@ -478,7 +609,6 @@
       }).reverse();
     }
 
-    // Get all transactions sorted by date (most recent first)
     function getAllTransactions() {
       const all = [];
       const addTx = (phases, currency) => {
@@ -546,8 +676,73 @@
       render();
     }
 
-    function toggleAutoSell() {
-      state.autoSell = !state.autoSell;
+    // toggleAutoSell removed - auto sell disabled
+
+    // Chart modal functions
+    function openChartModal(currency) {
+      const symbolMap = {
+        USD: 'FX_IDC%3AUSDKRW',
+        JPY: 'FX_IDC%3AJPYKRW',
+        EUR: 'FX_IDC%3AEURKRW',
+        CNY: 'FX_IDC%3ACNYKRW'
+      };
+      const nameMap = {
+        USD: 'USD/KRW 환율 차트',
+        JPY: 'JPY/KRW 환율 차트 (100엔)',
+        EUR: 'EUR/KRW 환율 차트',
+        CNY: 'CNY/KRW 환율 차트'
+      };
+      const ci = CURRENCIES[currency];
+      const symbol = symbolMap[currency];
+      const chartUrl = `https://s.tradingview.com/widgetembed/?frameElementId=tv_chart_modal&symbol=${symbol}&interval=D&hidesidetoolbar=0&symboledit=0&saveimage=0&toolbarbg=f1f3f6&studies=&theme=Light&style=1&timezone=Asia%2FSeoul&withdateranges=1&showpopupbutton=0&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=kr`;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'chart-modal-overlay';
+      overlay.id = 'chartModal';
+      overlay.innerHTML = `
+        <div class="chart-modal-header">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">${ci.flag}</span>
+            <span class="font-bold text-sm">${nameMap[currency]}</span>
+          </div>
+          <button onclick="closeChartModal()" class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors">
+            <span class="text-xl font-bold">&times;</span>
+          </button>
+        </div>
+        <div class="chart-modal-body">
+          <iframe scrolling="no" allowtransparency="true" frameborder="0" src="${chartUrl}"></iframe>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    function closeChartModal() {
+      const modal = document.getElementById('chartModal');
+      if (modal) modal.remove();
+    }
+
+    // Edit budget functions
+    function startEditBudget() {
+      state.isEditingBudget = true;
+      render();
+      setTimeout(() => document.getElementById('budgetInput')?.focus(), 0);
+    }
+
+    function confirmBudget() {
+      const input = document.getElementById('budgetInput');
+      const value = parseInt(input?.value) || 0;
+      if (value <= 0) {
+        alert('유효한 금액을 입력해주세요.');
+        return;
+      }
+      state.initialBudget = value;
+      state.isEditingBudget = false;
+      saveToStorage();
+      render();
+    }
+
+    function cancelBudget() {
+      state.isEditingBudget = false;
       render();
     }
 
@@ -618,9 +813,7 @@
         }
       });
 
-      // Update header right
       renderHeaderRight();
-
       lucide.createIcons();
     }
 
@@ -630,14 +823,14 @@
       if (state.currentPage === 'rate' || state.currentPage === 'invest') {
         const rateLabel = state.activeTab === 'JPY' ? '100¥' : ci.sym + '1';
         el.innerHTML = `
-          <div class="flex items-center gap-1 bg-white/20 rounded-lg px-3 py-1.5">
+          <div class="flex items-center gap-1 bg-white/20 rounded-lg px-3 py-1.5 backdrop-blur-sm">
             <span class="text-xs font-bold">${ci.flag}</span>
             <span class="text-sm font-bold">${getCurrentRate().toFixed(ci.decimals)}원</span>
           </div>
         `;
       } else {
         el.innerHTML = `
-          <div class="flex items-center gap-1 bg-white/20 rounded-lg px-2 py-1.5 flex-wrap justify-end" style="max-width:200px;">
+          <div class="flex items-center gap-1 bg-white/20 rounded-lg px-2 py-1.5 flex-wrap justify-end backdrop-blur-sm" style="max-width:200px;">
             <span class="text-[10px] font-bold">🇺🇸${state.usdRate.toFixed(1)}</span>
             <span class="text-[8px] mx-0.5 opacity-50">|</span>
             <span class="text-[10px] font-bold">🇯🇵${state.jpyRate.toFixed(0)}</span>
@@ -681,12 +874,23 @@
       const activeCount = allPhases.filter(p => p.completed && !p.sold).length;
       const soldCount = allPhases.filter(p => p.sold).length;
 
+      // Check buy timing for each currency
+      const buySignals = [];
+      Object.keys(CURRENCIES).forEach(cur => {
+        const target = getTargetBuyRate(cur);
+        const currentR = getRateForCurrency(cur);
+        if (target !== null && currentR <= target) {
+          buySignals.push(cur);
+        }
+      });
+
       return `
         <div class="p-4 page-enter">
           <!-- Total Profit Hero Card -->
-          <div class="relative overflow-hidden rounded-2xl ${totalAll >= 0 ? 'bg-gradient-to-br from-emerald-500 to-green-600 profit-glow' : 'bg-gradient-to-br from-red-500 to-rose-600 loss-glow'} text-white p-5 mb-4">
+          <div class="relative overflow-hidden rounded-2xl ${totalAll >= 0 ? 'bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 profit-glow' : 'bg-gradient-to-br from-red-500 via-rose-500 to-pink-600 loss-glow'} text-white p-5 mb-4">
             <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-8 translate-x-8"></div>
             <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-6 -translate-x-6"></div>
+            <div class="absolute top-1/2 right-4 w-16 h-16 bg-white/5 rounded-full"></div>
             <div class="relative z-10">
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
@@ -696,7 +900,7 @@
                     <p class="text-lg font-extrabold">${grade.grade}</p>
                   </div>
                 </div>
-                <div class="bg-white/20 rounded-xl px-3 py-1.5">
+                <div class="bg-white/20 rounded-xl px-3 py-1.5 backdrop-blur-sm">
                   <p class="text-[10px] font-medium text-white/80">수익률</p>
                   <p class="text-sm font-bold">${grade.returnRate >= 0 ? '+' : ''}${grade.returnRate.toFixed(1)}%</p>
                 </div>
@@ -706,11 +910,11 @@
                 <p class="text-3xl font-black tracking-tight num-tick">${totalAll >= 0 ? '+' : ''}${fmt(totalAll)}원</p>
               </div>
               <div class="grid grid-cols-2 gap-3 mt-3">
-                <div class="bg-white/15 rounded-xl p-3">
+                <div class="bg-white/15 rounded-xl p-3 backdrop-blur-sm">
                   <p class="text-[10px] text-white/70 font-medium">실현수익</p>
                   <p class="text-sm font-bold">${totalProfit >= 0 ? '+' : ''}${fmtMan(totalProfit)}원</p>
                 </div>
-                <div class="bg-white/15 rounded-xl p-3">
+                <div class="bg-white/15 rounded-xl p-3 backdrop-blur-sm">
                   <p class="text-[10px] text-white/70 font-medium">평가손익</p>
                   <p class="text-sm font-bold">${unrealized >= 0 ? '+' : ''}${fmtMan(unrealized)}원</p>
                 </div>
@@ -718,9 +922,26 @@
             </div>
           </div>
 
+          ${buySignals.length > 0 ? `
+          <!-- Buy Signal Alert -->
+          <div class="golden-flash rounded-2xl p-4 mb-4 bg-gradient-to-r from-amber-50 to-yellow-50">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xl golden-flash-badge">🔔</span>
+              <p class="text-sm font-extrabold text-amber-800">매수 타이밍!</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              ${buySignals.map(cur => `
+                <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold golden-flash-badge">
+                  ${CURRENCIES[cur].flag} ${cur} ${getRateForCurrency(cur).toFixed(CURRENCIES[cur].decimals)}원 ≤ 목표 ${getTargetBuyRate(cur)}원
+                </span>
+              `).join('')}
+            </div>
+          </div>
+          ` : ''}
+
           <!-- Quick Summary Cards -->
           <div class="grid grid-cols-3 gap-2 mb-4">
-            <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+            <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 card-hover">
               <div class="flex items-center gap-1.5 mb-1">
                 <div class="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center">
                   <i data-lucide="wallet" class="w-3.5 h-3.5 text-blue-600"></i>
@@ -729,7 +950,7 @@
               <p class="text-[10px] text-gray-500">투자중</p>
               <p class="text-sm font-bold text-gray-800">${fmtManInt(investedActive)}</p>
             </div>
-            <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+            <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 card-hover">
               <div class="flex items-center gap-1.5 mb-1">
                 <div class="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">
                   <i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-600"></i>
@@ -738,7 +959,7 @@
               <p class="text-[10px] text-gray-500">보유 건수</p>
               <p class="text-sm font-bold text-gray-800">${activeCount}건</p>
             </div>
-            <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100">
+            <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 card-hover">
               <div class="flex items-center gap-1.5 mb-1">
                 <div class="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
                   <i data-lucide="trophy" class="w-3.5 h-3.5 text-purple-600"></i>
@@ -751,9 +972,12 @@
 
           <!-- Recent Transactions -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-              <h2 class="text-sm font-bold text-gray-800">최근 거래 내역</h2>
-              <span class="text-[10px] text-gray-400 font-medium">${allTx.length}건 중 최근 10건</span>
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+              <h2 class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4 text-indigo-500"></i>
+                최근 거래 내역
+              </h2>
+              <span class="text-[10px] text-gray-400 font-medium bg-gray-100 px-2 py-1 rounded-full">${allTx.length}건 중 최근 10건</span>
             </div>
             ${recentTx.length > 0 ? `
               <div class="divide-y divide-gray-50">
@@ -764,8 +988,8 @@
                   const profit = isSell ? (getKRWValue(foreignAmt, tx.sellRate, tx.currency) - tx.amount) : 0;
                   const foreignLabel = tx.currency === 'JPY' ? ci.sym + Math.round(foreignAmt).toLocaleString() : ci.sym + foreignAmt.toFixed(2);
                   return `
-                    <div class="flex items-center px-4 py-3 gap-3">
-                      <div class="w-10 h-10 rounded-xl flex items-center justify-center ${isSell ? 'bg-red-50' : 'bg-blue-50'}">
+                    <div class="flex items-center px-4 py-3 gap-3 hover:bg-gray-50 transition-colors">
+                      <div class="w-10 h-10 rounded-xl flex items-center justify-center ${isSell ? 'bg-gradient-to-br from-red-50 to-orange-50' : 'bg-gradient-to-br from-blue-50 to-indigo-50'}">
                         <span class="text-lg">${isSell ? '📤' : '📥'}</span>
                       </div>
                       <div class="flex-1 min-w-0">
@@ -798,7 +1022,7 @@
     }
 
     // ==========================================
-    // RATE PAGE - with Investing.com widgets
+    // RATE PAGE - with TradingView widgets (NO rate box here anymore)
     // ==========================================
     function renderRatePage() {
       const currentRate = getCurrentRate();
@@ -809,40 +1033,9 @@
           <!-- Currency Tabs -->
           ${renderCurrencyTabs()}
 
-          <!-- Rate Display Card -->
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-sm font-bold text-gray-600">현재 환율 ${state.activeTab === 'JPY' ? '(100엔당)' : ''}</h2>
-              ${state.lastUpdated ? `<p class="text-[10px] text-gray-400">${state.lastUpdated.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} 업데이트</p>` : ''}
-            </div>
-
-            ${state.isEditingRate ? `
-              <div class="flex items-center gap-2 justify-center">
-                <input type="number" id="tempRateInput" value="${state.tempRate}" class="w-40 px-4 py-3 border-2 border-indigo-500 rounded-xl text-2xl font-bold text-center focus:outline-none focus:ring-2 focus:ring-indigo-300" step="${ci.step}" />
-                <button onclick="confirmRate()" class="w-12 h-12 bg-indigo-500 text-white rounded-xl font-bold text-lg flex items-center justify-center shadow-md">✓</button>
-                <button onclick="cancelRate()" class="w-12 h-12 bg-gray-300 text-gray-600 rounded-xl font-bold text-lg flex items-center justify-center">✕</button>
-              </div>
-            ` : `
-              <div class="text-center">
-                <div class="inline-flex items-baseline gap-2 mb-4">
-                  <span class="text-5xl font-black text-gray-800">${currentRate.toFixed(ci.decimals)}</span>
-                  <span class="text-2xl font-bold text-gray-400">원</span>
-                </div>
-                <div class="flex justify-center gap-2">
-                  <button onclick="startEditRate()" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all">
-                    <i data-lucide="edit-2" class="w-4 h-4"></i> 수동입력
-                  </button>
-                  <button onclick="fetchRate()" ${state.isLoadingRate ? 'disabled' : ''} class="flex items-center gap-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all">
-                    <i data-lucide="refresh-cw" class="w-4 h-4 ${state.isLoadingRate ? 'animate-spin' : ''}"></i> ${state.isLoadingRate ? '조회중...' : '실시간 조회'}
-                  </button>
-                </div>
-              </div>
-            `}
-          </div>
-
           <!-- All rates info grid -->
           <div class="grid grid-cols-2 gap-3 mb-4">
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 ${state.activeTab === 'USD' ? 'ring-2 ring-indigo-200' : ''}" onclick="switchTab('USD')">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 cursor-pointer card-hover ${state.activeTab === 'USD' ? 'ring-2 ring-indigo-300 shadow-indigo-100' : ''}" onclick="switchTab('USD')">
               <div class="flex items-center gap-2 mb-1">
                 <span class="text-lg">🇺🇸</span>
                 <div>
@@ -851,7 +1044,7 @@
                 </div>
               </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 ${state.activeTab === 'JPY' ? 'ring-2 ring-indigo-200' : ''}" onclick="switchTab('JPY')">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 cursor-pointer card-hover ${state.activeTab === 'JPY' ? 'ring-2 ring-indigo-300 shadow-indigo-100' : ''}" onclick="switchTab('JPY')">
               <div class="flex items-center gap-2 mb-1">
                 <span class="text-lg">🇯🇵</span>
                 <div>
@@ -860,7 +1053,7 @@
                 </div>
               </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 ${state.activeTab === 'EUR' ? 'ring-2 ring-indigo-200' : ''}" onclick="switchTab('EUR')">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 cursor-pointer card-hover ${state.activeTab === 'EUR' ? 'ring-2 ring-indigo-300 shadow-indigo-100' : ''}" onclick="switchTab('EUR')">
               <div class="flex items-center gap-2 mb-1">
                 <span class="text-lg">🇪🇺</span>
                 <div>
@@ -869,7 +1062,7 @@
                 </div>
               </div>
             </div>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 ${state.activeTab === 'CNY' ? 'ring-2 ring-indigo-200' : ''}" onclick="switchTab('CNY')">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 cursor-pointer card-hover ${state.activeTab === 'CNY' ? 'ring-2 ring-indigo-300 shadow-indigo-100' : ''}" onclick="switchTab('CNY')">
               <div class="flex items-center gap-2 mb-1">
                 <span class="text-lg">🇨🇳</span>
                 <div>
@@ -880,144 +1073,74 @@
             </div>
           </div>
 
-          <!-- Auto Sell Toggle -->
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 ${state.autoSell ? 'bg-green-100' : 'bg-gray-100'} rounded-xl flex items-center justify-center">
-                  <i data-lucide="zap" class="w-5 h-5 ${state.autoSell ? 'text-green-600' : 'text-gray-400'}"></i>
-                </div>
-                <div>
-                  <p class="font-bold text-sm text-gray-800">자동 매도</p>
-                  <p class="text-[10px] text-gray-400">목표환율 +1원 도달시 자동 매도</p>
-                </div>
-              </div>
-              <button onclick="toggleAutoSell()" class="relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${state.autoSell ? 'bg-green-500' : 'bg-gray-300'}">
-                <span class="inline-block h-6 w-6 transform rounded-full bg-white shadow-sm transition-transform ${state.autoSell ? 'translate-x-7' : 'translate-x-1'}"></span>
-              </button>
-            </div>
-          </div>
-
-          <!-- ==========================================
-               Investing.com Widgets Section
-               ========================================== -->
-          
-          <!-- Section Title -->
+          <!-- TradingView Widgets Section -->
           <div class="flex items-center gap-2 mb-3 mt-2">
             <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
               <i data-lucide="globe" class="w-4 h-4 text-orange-600"></i>
             </div>
             <div>
               <h3 class="text-sm font-bold text-gray-800">실시간 시장 정보</h3>
-              <p class="text-[10px] text-gray-400">Investing.com 제공</p>
+              <p class="text-[10px] text-gray-400">TradingView 제공</p>
             </div>
           </div>
 
-          <!-- Investing.com Currency Cross Rates Widget -->
-          <div class="widget-container mb-4 shadow-sm">
-            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-2.5 border-b border-gray-100">
-              <p class="text-xs font-bold text-gray-700">📊 주요 환율 실시간</p>
-            </div>
-            <div id="investingCurrencyWidget" style="min-height:300px;">
-              <iframe src="https://sslecal2.investing.com/forex-cross-rates?columns=1,2,3,9,10&currencies=4,22,7,17,49&providers=1" 
-                width="100%" height="300" frameborder="0" allowtransparency="true" 
-                style="margin:0; padding:0;"></iframe>
-            </div>
-          </div>
-
-          <!-- Investing.com Live Currency Rates Widget -->
-          <div class="widget-container mb-4 shadow-sm">
-            <div class="bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-2.5 border-b border-gray-100">
-              <p class="text-xs font-bold text-gray-700">💱 실시간 환율 시세</p>
-            </div>
-            <div id="investingLiveRates" style="min-height:350px;">
-              <iframe src="https://sslecal2.investing.com/live-currency-cross-rates?pairs=1,2,3,5,9,10,7,46&columns=2,3,4,5,6,8,9" 
-                width="100%" height="350" frameborder="0" allowtransparency="true"
-                style="margin:0; padding:0;"></iframe>
-            </div>
-          </div>
-
-          <!-- Investing.com USD/KRW Chart Widget -->
+          <!-- TradingView USD/KRW Chart Widget -->
           <div class="widget-container mb-4 shadow-sm">
             <div class="bg-gradient-to-r from-blue-50 to-cyan-50 px-4 py-2.5 border-b border-gray-100">
               <p class="text-xs font-bold text-gray-700">📈 USD/KRW 차트</p>
             </div>
             <div style="min-height:420px; position:relative;">
-              <iframe src="https://tvc-invdn-com.investing.com/web/1.12.2/index48-prod.html?lang=24&pair_ID=650&time=5Y&candle=month&theme=2" 
-                width="100%" height="420" frameborder="0" allowtransparency="true"
-                style="margin:0; padding:0;"></iframe>
+              <iframe scrolling="no" allowtransparency="true" frameborder="0"
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart_usdkrw&symbol=FX_IDC%3AUSDKRW&interval=M&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=f1f3f6&studies=&theme=Light&style=1&timezone=Asia%2FSeoul&withdateranges=1&showpopupbutton=0&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=kr"
+                style="width: 100%; height: 420px; margin: 0; padding: 0;"></iframe>
             </div>
           </div>
 
-          <!-- Investing.com JPY/KRW Chart Widget -->
+          <!-- TradingView JPY/KRW Chart Widget -->
           <div class="widget-container mb-4 shadow-sm">
             <div class="bg-gradient-to-r from-red-50 to-pink-50 px-4 py-2.5 border-b border-gray-100">
               <p class="text-xs font-bold text-gray-700">📈 JPY/KRW 차트 (100엔)</p>
             </div>
             <div style="min-height:420px; position:relative;">
-              <iframe src="https://tvc-invdn-com.investing.com/web/1.12.2/index48-prod.html?lang=24&pair_ID=2111&time=5Y&candle=month&theme=2" 
-                width="100%" height="420" frameborder="0" allowtransparency="true"
-                style="margin:0; padding:0;"></iframe>
+              <iframe scrolling="no" allowtransparency="true" frameborder="0"
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart_jpykrw&symbol=FX_IDC%3AJPYKRW&interval=M&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=f1f3f6&studies=&theme=Light&style=1&timezone=Asia%2FSeoul&withdateranges=1&showpopupbutton=0&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=kr"
+                style="width: 100%; height: 420px; margin: 0; padding: 0;"></iframe>
             </div>
           </div>
 
-          <!-- Investing.com EUR/KRW Chart Widget -->
+          <!-- TradingView EUR/KRW Chart Widget -->
           <div class="widget-container mb-4 shadow-sm">
             <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-2.5 border-b border-gray-100">
               <p class="text-xs font-bold text-gray-700">📈 EUR/KRW 차트</p>
             </div>
             <div style="min-height:420px; position:relative;">
-              <iframe src="https://tvc-invdn-com.investing.com/web/1.12.2/index48-prod.html?lang=24&pair_ID=2577&time=5Y&candle=month&theme=2" 
-                width="100%" height="420" frameborder="0" allowtransparency="true"
-                style="margin:0; padding:0;"></iframe>
+              <iframe scrolling="no" allowtransparency="true" frameborder="0"
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart_eurkrw&symbol=FX_IDC%3AEURKRW&interval=M&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=f1f3f6&studies=&theme=Light&style=1&timezone=Asia%2FSeoul&withdateranges=1&showpopupbutton=0&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=kr"
+                style="width: 100%; height: 420px; margin: 0; padding: 0;"></iframe>
             </div>
           </div>
 
-          <!-- Investing.com CNY/KRW Chart Widget -->
+          <!-- TradingView CNY/KRW Chart Widget -->
           <div class="widget-container mb-4 shadow-sm">
             <div class="bg-gradient-to-r from-yellow-50 to-orange-50 px-4 py-2.5 border-b border-gray-100">
               <p class="text-xs font-bold text-gray-700">📈 CNY/KRW 차트</p>
             </div>
             <div style="min-height:420px; position:relative;">
-              <iframe src="https://tvc-invdn-com.investing.com/web/1.12.2/index48-prod.html?lang=24&pair_ID=2632&time=5Y&candle=month&theme=2" 
-                width="100%" height="420" frameborder="0" allowtransparency="true"
-                style="margin:0; padding:0;"></iframe>
-            </div>
-          </div>
-
-          <!-- Investing.com Dollar Index Widget -->
-          <div class="widget-container mb-4 shadow-sm">
-            <div class="bg-gradient-to-r from-amber-50 to-yellow-50 px-4 py-2.5 border-b border-gray-100">
-              <p class="text-xs font-bold text-gray-700">💵 달러 인덱스 (DXY) 차트</p>
-            </div>
-            <div style="min-height:420px; position:relative;">
-              <iframe src="https://tvc-invdn-com.investing.com/web/1.12.2/index48-prod.html?lang=24&pair_ID=8827&time=5Y&candle=month&theme=2" 
-                width="100%" height="420" frameborder="0" allowtransparency="true"
-                style="margin:0; padding:0;"></iframe>
-            </div>
-          </div>
-
-          <!-- Investing.com Economic Calendar Widget -->
-          <div class="widget-container mb-4 shadow-sm">
-            <div class="bg-gradient-to-r from-violet-50 to-purple-50 px-4 py-2.5 border-b border-gray-100">
-              <p class="text-xs font-bold text-gray-700">📅 경제 캘린더</p>
-            </div>
-            <div style="min-height:450px;">
-              <iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&importance=2,3&features=datepicker,timezone,times498&countries=72,4,17,25,35,37&calType=week&timeZone=88&lang=24" 
-                width="100%" height="450" frameborder="0" allowtransparency="true"
-                style="margin:0; padding:0;"></iframe>
+              <iframe scrolling="no" allowtransparency="true" frameborder="0"
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart_cnykrw&symbol=FX_IDC%3ACNYKRW&interval=M&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=f1f3f6&studies=&theme=Light&style=1&timezone=Asia%2FSeoul&withdateranges=1&showpopupbutton=0&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&locale=kr"
+                style="width: 100%; height: 420px; margin: 0; padding: 0;"></iframe>
             </div>
           </div>
 
           <div class="text-center py-2 mb-4">
-            <p class="text-[10px] text-gray-300">실시간 데이터는 Investing.com에서 제공됩니다</p>
+            <p class="text-[10px] text-gray-300">실시간 데이터는 TradingView에서 제공됩니다</p>
           </div>
         </div>
       `;
     }
 
     // ==========================================
-    // INVEST PAGE
+    // INVEST PAGE (now includes the Rate Display box + target buy rate)
     // ==========================================
     function renderInvestPage() {
       const phases = getPhases();
@@ -1044,16 +1167,106 @@
       const allPhases = [...state.usdPhases, ...state.jpyPhases, ...state.eurPhases, ...state.cnyPhases];
       const cumInvested = allPhases.reduce((s, p) => s + p.amount, 0);
 
-      // Format foreign amount display
       const fmtForeign = (amt) => {
         if (cur === 'JPY') return ci.sym + Math.round(amt).toLocaleString();
         return ci.sym + amt.toFixed(2);
       };
 
+      // Target buy rate check
+      const targetBuy = getTargetBuyRate(cur);
+      const isBuyTiming = targetBuy !== null && currentRate <= targetBuy;
+
+      // Check each active phase for sell target
+      const sellTargetPhases = active.filter(p => p.completed && currentRate >= p.sellRate);
+
       return `
         <div class="p-4 page-enter">
           <!-- Currency Tabs -->
           ${renderCurrencyTabs()}
+
+          <!-- ===== RATE DISPLAY CARD (Moved from rate page) ===== -->
+          <div class="rate-card-glow rounded-2xl p-5 mb-4 ${isBuyTiming ? 'golden-flash' : ''}">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+                <i data-lucide="activity" class="w-4 h-4 text-indigo-500"></i>
+                현재 환율 ${cur === 'JPY' ? '(100엔당)' : ''}
+              </h2>
+              <div class="flex items-center gap-2">
+                <button onclick="openChartModal('${cur}')" class="flex items-center gap-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors shadow-sm">
+                  <i data-lucide="line-chart" class="w-3.5 h-3.5"></i> 차트보기
+                </button>
+                ${state.lastUpdated ? `<p class="text-[10px] text-gray-400">${state.lastUpdated.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</p>` : ''}
+              </div>
+            </div>
+
+            ${state.isEditingRate ? `
+              <div class="flex items-center gap-2 justify-center">
+                <input type="number" id="tempRateInput" value="${state.tempRate}" class="w-40 px-4 py-3 border-2 border-indigo-500 rounded-xl text-2xl font-bold text-center focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white" step="${ci.step}" />
+                <button onclick="confirmRate()" class="w-12 h-12 bg-indigo-500 text-white rounded-xl font-bold text-lg flex items-center justify-center shadow-md hover:bg-indigo-600 transition-colors">✓</button>
+                <button onclick="cancelRate()" class="w-12 h-12 bg-gray-300 text-gray-600 rounded-xl font-bold text-lg flex items-center justify-center hover:bg-gray-400 transition-colors">✕</button>
+              </div>
+            ` : `
+              <div class="text-center">
+                <div class="inline-flex items-baseline gap-2 mb-1">
+                  <span class="text-5xl font-black gradient-text">${currentRate.toFixed(ci.decimals)}</span>
+                  <span class="text-2xl font-bold text-gray-400">원</span>
+                </div>
+                ${isBuyTiming ? `
+                  <div class="my-3">
+                    <span class="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-white text-sm font-extrabold shadow-lg golden-flash-badge">
+                      ⚡ 매수 타이밍! (목표: ${targetBuy}원 이하)
+                    </span>
+                  </div>
+                ` : ''}
+                <div class="flex justify-center gap-2 mt-3">
+                  <button onclick="startEditRate()" class="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm border border-gray-200">
+                    <i data-lucide="edit-2" class="w-4 h-4"></i> 수동입력
+                  </button>
+                  <button onclick="fetchRate()" ${state.isLoadingRate ? 'disabled' : ''} class="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm">
+                    <i data-lucide="refresh-cw" class="w-4 h-4 ${state.isLoadingRate ? 'animate-spin' : ''}"></i> ${state.isLoadingRate ? '조회중...' : '실시간 조회'}
+                  </button>
+                </div>
+              </div>
+            `}
+          </div>
+
+          <!-- ===== TARGET BUY RATE INPUT ===== -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+            <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <i data-lucide="target" class="w-4 h-4 text-amber-500"></i>
+              목표 매수환율 설정
+              <span class="text-[10px] font-normal text-gray-400 ml-auto">실시간환율 ≤ 목표환율 → 매수 타이밍</span>
+            </h3>
+            <div class="flex items-center gap-3">
+              <div class="flex-1 relative">
+                <input type="number" 
+                  id="targetBuyInput"
+                  value="${state[`targetBuyRate_${cur}`]}" 
+                  onchange="setTargetBuyRate('${cur}', this.value); render();"
+                  oninput="setTargetBuyRate('${cur}', this.value);"
+                  class="w-full px-4 py-3 border-2 ${isBuyTiming ? 'border-amber-400 bg-amber-50' : 'border-gray-200 bg-gray-50'} rounded-xl text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-400 transition-all" 
+                  placeholder="목표 매수환율 입력" 
+                  step="${ci.step}" />
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400">원${cur === 'JPY' ? '/100엔' : ''}</span>
+              </div>
+              ${state[`targetBuyRate_${cur}`] !== '' ? `
+                <button onclick="setTargetBuyRate('${cur}', ''); render();" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors">
+                  <i data-lucide="x" class="w-4 h-4 text-gray-500"></i>
+                </button>
+              ` : ''}
+            </div>
+            ${targetBuy !== null ? `
+              <div class="mt-3 flex items-center justify-between px-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full ${isBuyTiming ? 'bg-amber-400 animate-pulse' : 'bg-gray-300'}"></span>
+                  <span class="text-xs text-gray-500">현재: <strong class="${isBuyTiming ? 'text-amber-600' : 'text-gray-700'}">${currentRate.toFixed(ci.decimals)}원</strong></span>
+                </div>
+                <span class="text-xs ${isBuyTiming ? 'text-amber-600 font-bold' : 'text-gray-500'}">
+                  ${isBuyTiming ? '✅ 목표 도달! 매수하세요!' : `차이: ${(currentRate - targetBuy).toFixed(ci.decimals)}원`}
+                </span>
+              </div>
+            ` : ''}
+          </div>
 
           <!-- Portfolio Summary -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
@@ -1062,21 +1275,34 @@
               ${cur} 포트폴리오 ${cur === 'JPY' ? '<span class="text-[10px] text-gray-400 font-normal">(100엔 기준)</span>' : ''}
             </h3>
             <div class="grid grid-cols-2 gap-2 mb-2">
-              <div class="bg-blue-50 rounded-xl p-3">
-                <p class="text-[10px] text-gray-500 font-medium">초기예산</p>
-                <p class="font-bold text-sm text-blue-600">${fmtManInt(state.initialBudget)}</p>
+              <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-3 cursor-pointer" onclick="startEditBudget()">
+                <div class="flex items-center justify-between">
+                  <p class="text-[10px] text-gray-500 font-medium">초기예산</p>
+                  <i data-lucide="edit-2" class="w-3 h-3 text-blue-400"></i>
+                </div>
+                ${state.isEditingBudget ? `
+                  <div class="flex items-center gap-1 mt-1" onclick="event.stopPropagation()">
+                    <input type="number" id="budgetInput" value="${state.initialBudget}" 
+                      class="w-full px-2 py-1 border border-blue-400 rounded-lg text-sm font-bold text-center focus:outline-none focus:ring-1 focus:ring-blue-300 bg-white" 
+                      onkeydown="if(event.key==='Enter')confirmBudget();if(event.key==='Escape')cancelBudget();" />
+                    <button onclick="confirmBudget()" class="w-7 h-7 bg-blue-500 text-white rounded-lg text-xs font-bold flex-shrink-0">✓</button>
+                    <button onclick="cancelBudget()" class="w-7 h-7 bg-gray-300 text-gray-600 rounded-lg text-xs font-bold flex-shrink-0">✕</button>
+                  </div>
+                ` : `
+                  <p class="font-bold text-sm text-blue-600">${fmtManInt(state.initialBudget)}</p>
+                `}
               </div>
-              <div class="bg-purple-50 rounded-xl p-3">
-                <p class="text-[10px] text-gray-500 font-medium">현재예산</p>
-                <p class="font-bold text-sm text-purple-600">${fmtManInt(state.initialBudget + profit)}</p>
+              <div class="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl p-3">
+                <p class="text-[10px] text-gray-500 font-medium">남은예산</p>
+                <p class="font-bold text-sm text-purple-600">${fmtManInt(Math.max(0, state.initialBudget - invested))}</p>
               </div>
             </div>
             <div class="grid grid-cols-2 gap-2">
-              <div class="bg-green-50 rounded-xl p-3">
+              <div class="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-3">
                 <p class="text-[10px] text-gray-500 font-medium">보유 ${cur}</p>
                 <p class="font-bold text-sm text-green-600">${fmtForeign(foreign)}</p>
               </div>
-              <div class="bg-orange-50 rounded-xl p-3">
+              <div class="bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl p-3">
                 <p class="text-[10px] text-gray-500 font-medium">평균 매수가</p>
                 <p class="font-bold text-sm text-orange-600">${avgRate}원${cur === 'JPY' ? '/100엔' : ''}</p>
               </div>
@@ -1086,23 +1312,23 @@
           <!-- Investment Status -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
             <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-              <i data-lucide="activity" class="w-4 h-4 text-indigo-500"></i>
+              <i data-lucide="trending-up" class="w-4 h-4 text-indigo-500"></i>
               투자 현황
             </h3>
             <div class="grid grid-cols-2 gap-2">
-              <div class="bg-blue-50 rounded-xl p-3">
+              <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-3">
                 <p class="text-[10px] text-gray-500 font-medium">총 투자금</p>
                 <p class="font-bold text-sm text-blue-600">${fmtManInt(invested)}</p>
               </div>
-              <div class="bg-orange-50 rounded-xl p-3">
+              <div class="bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl p-3">
                 <p class="text-[10px] text-gray-500 font-medium">평가손익</p>
                 <p class="font-bold text-sm ${unrealized >= 0 ? 'text-red-600' : 'text-blue-600'}">${unrealized >= 0 ? '+' : ''}${fmtMan(unrealized)}원</p>
               </div>
-              <div class="bg-indigo-50 rounded-xl p-3">
+              <div class="bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-xl p-3">
                 <p class="text-[10px] text-gray-500 font-medium">전체 누적투자</p>
                 <p class="font-bold text-sm text-indigo-600">${fmtManInt(cumInvested)}</p>
               </div>
-              <div class="bg-green-50 rounded-xl p-3">
+              <div class="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-3">
                 <p class="text-[10px] text-gray-500 font-medium">실현수익</p>
                 <p class="font-bold text-sm ${profit >= 0 ? 'text-red-600' : 'text-blue-600'}">${profit >= 0 ? '+' : ''}${fmtMan(profit)}원</p>
               </div>
@@ -1110,10 +1336,19 @@
           </div>
 
           <!-- Add Phase Button -->
-          <button onclick="addPhase()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 mb-4 active:scale-[0.98] transition-transform">
-            <i data-lucide="plus-circle" class="w-5 h-5"></i>
-            새 매수 추가
-          </button>
+          ${(() => {
+            const allPh = [...state.usdPhases, ...state.jpyPhases, ...state.eurPhases, ...state.cnyPhases];
+            const totalInv = allPh.filter(p => p.completed && !p.sold).reduce((s, p) => s + p.amount, 0);
+            const remaining = state.initialBudget - totalInv;
+            const isOverBudget = remaining < 1000000;
+            return `
+              <button onclick="addPhase()" class="w-full ${isOverBudget ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 shadow-lg shadow-indigo-200 hover:shadow-xl'} text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 mb-4 active:scale-[0.98] transition-transform" ${isOverBudget ? 'title="예산 초과"' : ''}>
+                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                ${isOverBudget ? '예산 초과 - 매수 불가' : '새 매수 추가'}
+              </button>
+              ${isOverBudget ? '<p class="text-center text-xs text-red-500 -mt-3 mb-4">남은 예산: ' + fmt(Math.max(0, remaining)) + '원 (최소 100만원 필요)</p>' : ''}
+            `;
+          })()}
 
           <!-- Active Phases -->
           ${active.map((p, i) => renderActivePhase(p, i, currentRate, ci, cur)).join('')}
@@ -1141,16 +1376,22 @@
       const fRaw = getForeignAmount(p.amount, p.buyRate, cur);
       const diff = currentRate - p.buyRate;
       const cp = getKRWValue(fRaw, currentRate, cur) - p.amount;
-      const targetReached = p.completed && currentRate >= p.sellRate;
+      const sellTargetReached = p.completed && currentRate >= p.sellRate;
       const isExpanded = state.expandedPhase === p.id;
       const rateLabel = cur === 'JPY' ? '/100엔' : '';
 
+      // Determine flash class
+      let flashClass = '';
+      if (sellTargetReached) {
+        flashClass = 'green-flash';
+      }
+
       return `
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-3 overflow-hidden ${targetReached ? 'target-pulse border-yellow-300' : ''}">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-3 overflow-hidden ${flashClass}">
           <div onclick="toggleExpand(${p.id})" class="p-4 cursor-pointer ${p.completed ? 'bg-gradient-to-r from-green-50 to-emerald-50' : 'bg-gradient-to-r from-blue-50 to-indigo-50'}">
             <div class="flex justify-between items-start">
               <div class="flex items-start gap-3 flex-1">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center ${p.completed ? 'bg-green-100' : 'bg-blue-100'}">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center ${p.completed ? 'bg-green-100' : 'bg-blue-100'} shadow-sm">
                   ${p.completed ? '<i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>' : '<i data-lucide="shopping-cart" class="w-5 h-5 text-blue-600"></i>'}
                 </div>
                 <div class="flex-1">
@@ -1164,7 +1405,7 @@
                       <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${cp >= 0 ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">
                         ${cp >= 0 ? '+' : ''}${fmtMan(cp)}원
                       </span>
-                      ${targetReached ? '<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-yellow-100 text-yellow-700">🎯 목표도달!</span>' : ''}
+                      ${sellTargetReached ? '<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-green-100 text-green-700 green-flash-badge">💰 매도목표 도달!</span>' : ''}
                     </div>
                   ` : ''}
                 </div>
@@ -1193,9 +1434,9 @@
                 <p class="text-xs font-medium ${cp >= 0 ? 'text-red-600' : 'text-blue-600'}">📈 지금 매도시: ${cp >= 0 ? '+' : ''}${fmt(Math.round(cp))}원</p>
               </div>
               <div class="flex gap-2">
-                ${!p.completed ? `<button onclick="toggleComplete(${p.id})" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2.5 rounded-xl font-bold text-sm shadow-md">매수완료</button>` : ''}
-                ${p.completed ? `<button onclick="toggleSold(${p.id})" class="flex-1 bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2.5 rounded-xl font-bold text-sm shadow-md">매도 (${cp >= 0 ? '+' : ''}${fmtMan(cp)}원)</button>` : ''}
-                <button onclick="deletePhase(${p.id})" class="px-4 bg-red-500 text-white rounded-xl shadow-md flex items-center justify-center">
+                ${!p.completed ? `<button onclick="toggleComplete(${p.id})" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-shadow">매수완료</button>` : ''}
+                ${p.completed ? `<button onclick="toggleSold(${p.id})" class="flex-1 bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-2.5 rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-shadow">매도 (${cp >= 0 ? '+' : ''}${fmtMan(cp)}원)</button>` : ''}
+                <button onclick="deletePhase(${p.id})" class="px-4 bg-red-500 text-white rounded-xl shadow-md flex items-center justify-center hover:bg-red-600 transition-colors">
                   <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
               </div>
@@ -1238,7 +1479,7 @@
               <input type="number" value="${p.sellRate}" onchange="updatePhase(${p.id}, 'sellRate', parseFloat(this.value) || 0)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm" step="${ci.step}" placeholder="매도환율" />
               <input type="date" value="${p.date}" onchange="updatePhase(${p.id}, 'date', this.value)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm" />
               <input type="date" value="${p.sellDate}" onchange="updatePhase(${p.id}, 'sellDate', this.value)" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm" />
-              <button onclick="deletePhase(${p.id})" class="w-full bg-red-500 text-white py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold text-sm">
+              <button onclick="deletePhase(${p.id})" class="w-full bg-red-500 text-white py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold text-sm hover:bg-red-600 transition-colors">
                 <i data-lucide="trash-2" class="w-4 h-4"></i> 삭제
               </button>
             </div>
@@ -1248,7 +1489,7 @@
     }
 
     // ==========================================
-    // CALC PAGE
+    // CALC PAGE (FIXED: oninput -> onchange to prevent keyboard dismiss)
     // ==========================================
     function renderCalcPage() {
       const cur = state.calcCurrency;
@@ -1259,13 +1500,13 @@
       let result = 0;
       if (state.calcDirection === 'krwToForeign') {
         if (cur === 'JPY') {
-          result = rate > 0 ? (amount / rate) * 100 : 0; // KRW -> JPY
+          result = rate > 0 ? (amount / rate) * 100 : 0;
         } else {
           result = rate > 0 ? amount / rate : 0;
         }
       } else {
         if (cur === 'JPY') {
-          result = (amount / 100) * rate; // JPY -> KRW
+          result = (amount / 100) * rate;
         } else {
           result = amount * rate;
         }
@@ -1275,46 +1516,49 @@
         <div class="p-4 page-enter">
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
             <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <i data-lucide="calculator" class="w-5 h-5 text-indigo-500"></i>
+              <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <i data-lucide="calculator" class="w-5 h-5 text-indigo-500"></i>
+              </div>
               환전 계산기
             </h2>
 
             <!-- Currency selector -->
             <div class="grid grid-cols-4 gap-1.5 mb-4">
               ${Object.entries(CURRENCIES).map(([code, info]) => `
-                <button onclick="state.calcCurrency='${code}'; render();" class="py-2 rounded-xl font-bold text-xs transition-all ${state.calcCurrency === code ? 'bg-gradient-to-r ' + info.gradient + ' text-white shadow-md' : 'bg-gray-100 text-gray-500'}">
+                <button onclick="state.calcCurrency='${code}'; render();" class="py-2.5 rounded-xl font-bold text-xs transition-all ${state.calcCurrency === code ? 'bg-gradient-to-r ' + info.gradient + ' text-white shadow-md' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}">
                   ${info.flag} ${code}
                 </button>
               `).join('')}
             </div>
 
             <!-- Current rate display -->
-            <div class="bg-indigo-50 rounded-xl p-3 mb-4 text-center">
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-3 mb-4 text-center border border-indigo-100">
               <p class="text-[10px] text-indigo-600 font-medium">적용 환율</p>
               <p class="text-xl font-bold text-indigo-700">${ci.flag} ${cur === 'JPY' ? '100' : '1'} ${cur} = ${rate.toFixed(ci.decimals)}원</p>
             </div>
 
             <!-- Direction toggle -->
-            <button onclick="state.calcDirection = state.calcDirection === 'krwToForeign' ? 'foreignToKrw' : 'krwToForeign'; render();" class="w-full flex items-center justify-center gap-3 mb-4 py-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+            <button onclick="state.calcDirection = state.calcDirection === 'krwToForeign' ? 'foreignToKrw' : 'krwToForeign'; render();" class="w-full flex items-center justify-center gap-3 mb-4 py-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors border border-gray-100">
               <span class="text-sm font-bold ${state.calcDirection === 'krwToForeign' ? 'text-indigo-600' : 'text-gray-500'}">🇰🇷 KRW</span>
-              <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+              <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center shadow-sm">
                 <i data-lucide="arrow-right-left" class="w-4 h-4 text-indigo-600"></i>
               </div>
               <span class="text-sm font-bold ${state.calcDirection === 'foreignToKrw' ? 'text-indigo-600' : 'text-gray-500'}">${ci.flag} ${cur}</span>
             </button>
 
-            <!-- Input -->
+            <!-- Input - FIXED: using dedicated handler to prevent re-render closing keyboard -->
             <div class="mb-4">
               <label class="text-xs text-gray-500 font-semibold block mb-1.5">
                 ${state.calcDirection === 'krwToForeign' ? '원화 (KRW)' : `${cur} (${ci.sym})`} 입력
               </label>
-              <input type="number" id="calcInput" value="${state.calcAmount}" oninput="state.calcAmount = this.value; render();"
-                class="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl text-xl font-bold text-center focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400"
-                placeholder="금액을 입력하세요" />
+              <input type="number" id="calcInput" value="${state.calcAmount}" 
+                oninput="handleCalcInput(this.value)"
+                class="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl text-xl font-bold text-center focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all"
+                placeholder="금액을 입력하세요" inputmode="decimal" />
             </div>
 
             <!-- Result -->
-            <div class="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl p-5 text-white text-center">
+            <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 rounded-xl p-5 text-white text-center shadow-lg">
               <p class="text-xs text-white/70 font-medium mb-1">
                 ${state.calcDirection === 'krwToForeign' ? `${cur}로 환전시` : '원화 환전시'}
               </p>
@@ -1340,8 +1584,8 @@
                   : cur === 'EUR' ? [100, 500, 1000, 3000, 5000, 10000]
                   : [100, 500, 1000, 3000, 5000, 10000])
               ).map(v => `
-                <button onclick="state.calcAmount='${v}'; render(); setTimeout(() => document.getElementById('calcInput').value='${v}', 0);" 
-                  class="py-2.5 rounded-xl text-sm font-bold bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700 transition-colors">
+                <button onclick="setCalcAmount('${v}')" 
+                  class="py-2.5 rounded-xl text-sm font-bold bg-gray-50 text-gray-700 hover:bg-indigo-100 hover:text-indigo-700 transition-colors border border-gray-100">
                   ${state.calcDirection === 'krwToForeign' 
                     ? (v >= 10000 ? (v/10000) + '만' : fmt(v))
                     : ci.sym + fmt(v)
@@ -1352,6 +1596,60 @@
           </div>
         </div>
       `;
+    }
+
+    // FIXED: Separate handler for calc input to avoid re-rendering while typing
+    let calcRenderTimeout = null;
+    function handleCalcInput(value) {
+      state.calcAmount = value;
+      // Update the result display without full re-render (prevents keyboard dismiss)
+      if (calcRenderTimeout) clearTimeout(calcRenderTimeout);
+      calcRenderTimeout = setTimeout(() => {
+        // Only update the result section, not the full page
+        updateCalcResult();
+      }, 100);
+    }
+
+    function updateCalcResult() {
+      const cur = state.calcCurrency;
+      const ci = CURRENCIES[cur];
+      const rate = getRateForCurrency(cur);
+      const amount = parseFloat(state.calcAmount) || 0;
+
+      let result = 0;
+      if (state.calcDirection === 'krwToForeign') {
+        if (cur === 'JPY') {
+          result = rate > 0 ? (amount / rate) * 100 : 0;
+        } else {
+          result = rate > 0 ? amount / rate : 0;
+        }
+      } else {
+        if (cur === 'JPY') {
+          result = (amount / 100) * rate;
+        } else {
+          result = amount * rate;
+        }
+      }
+
+      // Find the result p element and update it directly
+      const resultContainer = document.querySelector('.page-enter .text-3xl.font-black');
+      if (resultContainer) {
+        resultContainer.textContent = state.calcDirection === 'krwToForeign'
+          ? (cur === 'JPY' 
+            ? ci.sym + Math.round(result).toLocaleString()
+            : ci.sym + result.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}))
+          : `${fmt(Math.round(result))}원`;
+      }
+    }
+
+    function setCalcAmount(val) {
+      state.calcAmount = val;
+      render();
+      // Re-focus after render
+      setTimeout(() => {
+        const input = document.getElementById('calcInput');
+        if (input) input.value = val;
+      }, 0);
     }
 
     // ==========================================
@@ -1392,7 +1690,7 @@
               </h3>
               <div class="flex gap-1">
                 ${['daily', 'weekly', 'monthly', 'yearly'].map(p => `
-                  <button onclick="setStatsPeriod('${p}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${state.statsPeriod === p ? 'bg-indigo-500 text-white shadow-sm' : 'bg-gray-100 text-gray-600'}">
+                  <button onclick="setStatsPeriod('${p}')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all ${state.statsPeriod === p ? 'bg-indigo-500 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">
                     ${p === 'daily' ? '일' : p === 'weekly' ? '주' : p === 'monthly' ? '월' : '년'}
                   </button>
                 `).join('')}
