@@ -156,17 +156,211 @@
       height: 100%;
       border: none;
     }
+
+    /* ===== SIDE MENU ===== */
+    .side-menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 9998;
+      background: rgba(0, 0, 0, 0);
+      transition: background 0.35s ease;
+      pointer-events: none;
+    }
+    .side-menu-overlay.active {
+      background: rgba(0, 0, 0, 0.5);
+      pointer-events: auto;
+    }
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      max-width: 80vw;
+      z-index: 9999;
+      transform: translateX(-100%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(180deg, #1e1b4b 0%, #312e81 40%, #3730a3 100%);
+      box-shadow: 4px 0 30px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .side-menu.open {
+      transform: translateX(0);
+    }
+    .side-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 24px;
+      color: rgba(255,255,255,0.75);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      position: relative;
+    }
+    .side-menu-item:hover {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    .side-menu-item.active {
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border-left-color: #a5b4fc;
+      font-weight: 600;
+    }
+    .side-menu-item .menu-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .side-menu-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: 8px 20px;
+    }
+    .side-menu-section-title {
+      padding: 16px 24px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+    .hamburger-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      color: white;
+      flex-shrink: 0;
+    }
+    .hamburger-btn:hover {
+      background: rgba(255,255,255,0.25);
+    }
+    .hamburger-btn:active {
+      transform: scale(0.92);
+    }
+    .hamburger-line {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: white;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+    .hamburger-line + .hamburger-line {
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-gray-50">
 
+  <!-- Side Menu Overlay -->
+  <div id="sideMenuOverlay" class="side-menu-overlay" onclick="closeSideMenu()"></div>
+
+  <!-- Side Menu -->
+  <div id="sideMenu" class="side-menu">
+    <div class="p-6 pb-4">
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-11 h-11 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-xl flex items-center justify-center shadow-lg">
+          <span class="text-2xl font-black text-white">$</span>
+        </div>
+        <div>
+          <h2 class="text-white font-extrabold text-lg leading-tight">절대강자</h2>
+          <p class="text-indigo-300 text-xs font-medium">분할환전 매니저</p>
+        </div>
+      </div>
+    </div>
+    <div class="side-menu-divider" style="margin-top:0;"></div>
+
+    <div class="side-menu-section-title">메뉴</div>
+    <div class="side-menu-item" data-page="home" onclick="sideMenuNav('home')">
+      <div class="menu-icon"><i data-lucide="home" class="w-[18px] h-[18px]"></i></div>
+      <span>홈 대시보드</span>
+    </div>
+    <div class="side-menu-item" data-page="rate" onclick="sideMenuNav('rate')">
+      <div class="menu-icon"><i data-lucide="trending-up" class="w-[18px] h-[18px]"></i></div>
+      <span>실시간 환율</span>
+    </div>
+    <div class="side-menu-item" data-page="invest" onclick="sideMenuNav('invest')">
+      <div class="menu-icon"><i data-lucide="wallet" class="w-[18px] h-[18px]"></i></div>
+      <span>분할 환전</span>
+    </div>
+    <div class="side-menu-item" data-page="stats" onclick="sideMenuNav('stats')">
+      <div class="menu-icon"><i data-lucide="bar-chart-3" class="w-[18px] h-[18px]"></i></div>
+      <span>투자 통계</span>
+    </div>
+    <div class="side-menu-item" data-page="calc" onclick="sideMenuNav('calc')">
+      <div class="menu-icon"><i data-lucide="calculator" class="w-[18px] h-[18px]"></i></div>
+      <span>환율 계산기</span>
+    </div>
+
+    <div class="side-menu-divider"></div>
+    <div class="side-menu-section-title">실시간 환율</div>
+    <div class="px-5 pb-3">
+      <div class="grid grid-cols-2 gap-2">
+        <div class="bg-white/10 rounded-xl p-3 text-center">
+          <div class="text-lg">🇺🇸</div>
+          <div class="text-white font-bold text-sm" id="sideMenuUsd">-</div>
+          <div class="text-indigo-300 text-[10px]">USD/KRW</div>
+        </div>
+        <div class="bg-white/10 rounded-xl p-3 text-center">
+          <div class="text-lg">🇯🇵</div>
+          <div class="text-white font-bold text-sm" id="sideMenuJpy">-</div>
+          <div class="text-indigo-300 text-[10px]">100JPY/KRW</div>
+        </div>
+        <div class="bg-white/10 rounded-xl p-3 text-center">
+          <div class="text-lg">🇪🇺</div>
+          <div class="text-white font-bold text-sm" id="sideMenuEur">-</div>
+          <div class="text-indigo-300 text-[10px]">EUR/KRW</div>
+        </div>
+        <div class="bg-white/10 rounded-xl p-3 text-center">
+          <div class="text-lg">🇨🇳</div>
+          <div class="text-white font-bold text-sm" id="sideMenuCny">-</div>
+          <div class="text-indigo-300 text-[10px]">CNY/KRW</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-menu-divider"></div>
+    <div class="side-menu-section-title">정보</div>
+    <div class="side-menu-item" onclick="closeSideMenu()" style="cursor:default;">
+      <div class="menu-icon"><i data-lucide="info" class="w-[18px] h-[18px]"></i></div>
+      <span class="text-sm">v2.0 · 절대강자 분할환전</span>
+    </div>
+    <div id="sideMenuLastUpdated" class="px-6 pb-6 text-indigo-400 text-[11px]">
+      마지막 업데이트: -
+    </div>
+  </div>
+
   <!-- Top Header Bar -->
   <header id="topBar" class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white shadow-lg">
     <div class="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-          <span class="text-lg font-black">$</span>
-        </div>
+      <div class="flex items-center gap-3">
+        <button class="hamburger-btn" onclick="toggleSideMenu()" aria-label="메뉴">
+          <div>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+          </div>
+        </button>
         <h1 class="text-lg font-extrabold tracking-tight">절대강자 분할환전</h1>
       </div>
       <div id="headerRight" class="flex items-center gap-2">
@@ -829,18 +1023,36 @@
           </div>
         `;
       } else {
-        el.innerHTML = `
-          <div class="flex items-center gap-1 bg-white/20 rounded-lg px-2 py-1.5 flex-wrap justify-end backdrop-blur-sm" style="max-width:200px;">
-            <span class="text-[10px] font-bold">🇺🇸${state.usdRate.toFixed(1)}</span>
-            <span class="text-[8px] mx-0.5 opacity-50">|</span>
-            <span class="text-[10px] font-bold">🇯🇵${state.jpyRate.toFixed(0)}</span>
-            <span class="text-[8px] mx-0.5 opacity-50">|</span>
-            <span class="text-[10px] font-bold">🇪🇺${state.eurRate.toFixed(0)}</span>
-            <span class="text-[8px] mx-0.5 opacity-50">|</span>
-            <span class="text-[10px] font-bold">🇨🇳${state.cnyRate.toFixed(0)}</span>
-          </div>
-        `;
+        // 홈, 통계, 계산 페이지에서는 환율 표시 제거
+        el.innerHTML = '';
       }
+      // Update side menu rates
+      updateSideMenuRates();
+    }
+
+    function updateSideMenuRates() {
+      const usdEl = document.getElementById('sideMenuUsd');
+      const jpyEl = document.getElementById('sideMenuJpy');
+      const eurEl = document.getElementById('sideMenuEur');
+      const cnyEl = document.getElementById('sideMenuCny');
+      const updEl = document.getElementById('sideMenuLastUpdated');
+      if (usdEl) usdEl.textContent = state.usdRate.toFixed(1) + '원';
+      if (jpyEl) jpyEl.textContent = state.jpyRate.toFixed(2) + '원';
+      if (eurEl) eurEl.textContent = state.eurRate.toFixed(2) + '원';
+      if (cnyEl) cnyEl.textContent = state.cnyRate.toFixed(2) + '원';
+      if (updEl) {
+        updEl.textContent = state.lastUpdated 
+          ? '마지막 업데이트: ' + state.lastUpdated.toLocaleTimeString('ko-KR')
+          : '마지막 업데이트: -';
+      }
+      // Update active menu item
+      document.querySelectorAll('.side-menu-item[data-page]').forEach(item => {
+        if (item.dataset.page === state.currentPage) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
     }
 
     // ==========================================
@@ -1775,6 +1987,82 @@
     }
 
     // ==========================================
+    // ==========================================
+    // SIDE MENU
+    // ==========================================
+    function toggleSideMenu() {
+      const menu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('sideMenuOverlay');
+      if (menu.classList.contains('open')) {
+        closeSideMenu();
+      } else {
+        openSideMenu();
+      }
+    }
+
+    function openSideMenu() {
+      const menu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('sideMenuOverlay');
+      menu.classList.add('open');
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      updateSideMenuRates();
+      lucide.createIcons();
+    }
+
+    function closeSideMenu() {
+      const menu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('sideMenuOverlay');
+      menu.classList.remove('open');
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function sideMenuNav(page) {
+      closeSideMenu();
+      setTimeout(() => {
+        switchPage(page);
+      }, 150);
+    }
+
+    // Handle swipe to close side menu
+    let touchStartX = 0;
+    let touchCurrentX = 0;
+    let isSwiping = false;
+
+    document.addEventListener('touchstart', function(e) {
+      const menu = document.getElementById('sideMenu');
+      if (menu.classList.contains('open')) {
+        touchStartX = e.touches[0].clientX;
+        if (touchStartX <= 280) {
+          isSwiping = true;
+        }
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', function(e) {
+      if (!isSwiping) return;
+      touchCurrentX = e.touches[0].clientX;
+      const diff = touchStartX - touchCurrentX;
+      if (diff > 0) {
+        const menu = document.getElementById('sideMenu');
+        menu.style.transform = `translateX(${-diff}px)`;
+        menu.style.transition = 'none';
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', function(e) {
+      if (!isSwiping) return;
+      isSwiping = false;
+      const diff = touchStartX - touchCurrentX;
+      const menu = document.getElementById('sideMenu');
+      menu.style.transition = '';
+      menu.style.transform = '';
+      if (diff > 80) {
+        closeSideMenu();
+      }
+    }, { passive: true });
+
     // INITIALIZE
     // ==========================================
     loadFromStorage();
