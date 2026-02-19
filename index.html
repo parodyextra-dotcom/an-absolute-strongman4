@@ -14,6 +14,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
@@ -347,8 +348,8 @@
 
   <!-- Profile Modal -->
   <div id="profileModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeProfileModal()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeProfileModal()" style="z-index:0;"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="z-index:1;">
       <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-center">
         <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
           <i data-lucide="user" class="w-10 h-10 text-white"></i>
@@ -389,16 +390,16 @@
         </div>
       </div>
       <div class="px-6 pb-6 flex gap-3">
-        <button onclick="closeProfileModal()" class="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">취소</button>
-        <button onclick="saveProfile()" class="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all shadow-lg">저장</button>
+        <button type="button" onclick="event.stopPropagation(); closeProfileModal();" class="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">취소</button>
+        <button type="button" onclick="event.stopPropagation(); saveProfile();" class="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all shadow-lg">저장</button>
       </div>
     </div>
   </div>
 
   <!-- Settings Modal -->
   <div id="settingsModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeSettingsModal()" style="z-index:0;"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="z-index:1;">
       <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 flex items-center justify-between">
         <h3 class="text-white font-bold text-lg flex items-center gap-2">
           <i data-lucide="settings" class="w-5 h-5"></i> 설정
@@ -451,8 +452,8 @@
 
   <!-- Usage Guide Modal -->
   <div id="usageGuideModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeUsageGuide()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="max-height:85vh;">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeUsageGuide()" style="z-index:0;"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="max-height:85vh; z-index:1;">
       <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 flex items-center justify-between">
         <h3 class="text-white font-bold text-lg flex items-center gap-2">
           <i data-lucide="book-open" class="w-5 h-5"></i> 사용방법
@@ -487,15 +488,15 @@
         </div>
       </div>
       <div class="px-5 pb-5 pt-3">
-        <button onclick="closeUsageGuide()" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all">확인</button>
+        <button type="button" onclick="event.stopPropagation(); closeUsageGuide();" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all">확인</button>
       </div>
     </div>
   </div>
 
   <!-- Privacy Policy Modal -->
   <div id="privacyPolicyModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePrivacyPolicy()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="max-height:85vh;">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePrivacyPolicy()" style="z-index:0;"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="max-height:85vh; z-index:1;">
       <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 flex items-center justify-between">
         <h3 class="text-white font-bold text-lg flex items-center gap-2">
           <i data-lucide="shield" class="w-5 h-5"></i> 개인정보처리방침
@@ -527,15 +528,15 @@
         </div>
       </div>
       <div class="px-5 pb-5 pt-3">
-        <button onclick="closePrivacyPolicy()" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all">확인</button>
+        <button type="button" onclick="event.stopPropagation(); closePrivacyPolicy();" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all">확인</button>
       </div>
     </div>
   </div>
 
   <!-- Terms of Service Modal -->
   <div id="termsModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeTermsOfService()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="max-height:85vh;">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeTermsOfService()" style="z-index:0;"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="max-height:85vh; z-index:1;">
       <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 flex items-center justify-between">
         <h3 class="text-white font-bold text-lg flex items-center gap-2">
           <i data-lucide="file-text" class="w-5 h-5"></i> 이용약관
@@ -571,7 +572,7 @@
         </div>
       </div>
       <div class="px-5 pb-5 pt-3">
-        <button onclick="closeTermsOfService()" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all">확인</button>
+        <button type="button" onclick="event.stopPropagation(); closeTermsOfService();" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all">확인</button>
       </div>
     </div>
   </div>
@@ -2365,9 +2366,214 @@
     // ==========================================
     // STATS PAGE
     // ==========================================
+
+    // Get all-currency stats grouped by period
+    function getAllCurrencyStats() {
+      const currencies = ['USD', 'JPY', 'EUR', 'CNY'];
+      const allSold = [];
+      currencies.forEach(cur => {
+        const phases = state[cur.toLowerCase() + 'Phases'] || (cur === 'USD' ? state.usdPhases : cur === 'JPY' ? state.jpyPhases : cur === 'EUR' ? state.eurPhases : state.cnyPhases);
+        phases.filter(p => p.sold && p.sellDate).forEach(p => {
+          allSold.push({ ...p, currency: cur });
+        });
+      });
+
+      let sold = allSold;
+      if (state.statsStartDate || state.statsEndDate) {
+        sold = sold.filter(p => {
+          const sellDate = new Date(p.sellDate);
+          const start = state.statsStartDate ? new Date(state.statsStartDate) : new Date('1900-01-01');
+          const end = state.statsEndDate ? new Date(state.statsEndDate) : new Date('2100-12-31');
+          return sellDate >= start && sellDate <= end;
+        });
+      }
+
+      if (sold.length === 0) return { grouped: {}, sorted: [], bestTrade: null, worstTrade: null };
+
+      // Find best and worst individual trades
+      const trades = sold.map(p => {
+        const foreignAmt = getForeignAmount(p.amount, p.buyRate, p.currency);
+        const krwVal = getKRWValue(foreignAmt, p.sellRate, p.currency);
+        const profit = krwVal - p.amount;
+        const rate = p.amount > 0 ? (profit / p.amount) * 100 : 0;
+        return { ...p, profit, profitRate: rate };
+      });
+
+      const bestTrade = trades.reduce((best, t) => (!best || t.profit > best.profit) ? t : best, null);
+      const worstTrade = trades.reduce((worst, t) => (!worst || t.profit < worst.profit) ? t : worst, null);
+
+      // Group by period
+      const grouped = {};
+      sold.forEach(p => {
+        const d = new Date(p.sellDate);
+        let key;
+        if (state.statsPeriod === 'daily') key = p.sellDate;
+        else if (state.statsPeriod === 'weekly') key = `${d.getFullYear()}-W${String(Math.ceil(((d - new Date(d.getFullYear(), 0, 1)) / 86400000 + new Date(d.getFullYear(), 0, 1).getDay() + 1) / 7)).padStart(2,'0')}`;
+        else if (state.statsPeriod === 'monthly') key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        else key = `${d.getFullYear()}`;
+
+        if (!grouped[key]) grouped[key] = { period: key, count: 0, inv: 0, prof: 0, byCurrency: { USD: 0, JPY: 0, EUR: 0, CNY: 0 }, byCurrencyInv: { USD: 0, JPY: 0, EUR: 0, CNY: 0 } };
+        const foreignAmt = getForeignAmount(p.amount, p.buyRate, p.currency);
+        const profit = getKRWValue(foreignAmt, p.sellRate, p.currency) - p.amount;
+        grouped[key].count += 1;
+        grouped[key].inv += p.amount;
+        grouped[key].prof += profit;
+        grouped[key].byCurrency[p.currency] += profit;
+        grouped[key].byCurrencyInv[p.currency] += p.amount;
+      });
+
+      const sorted = Object.values(grouped).sort((a, b) => a.period.localeCompare(b.period));
+      let cumInv = 0, cumProf = 0;
+      const result = sorted.map(item => {
+        cumInv += item.inv;
+        cumProf += item.prof;
+        return {
+          ...item,
+          rate: ((item.prof / item.inv) * 100).toFixed(2),
+          cumInv,
+          cumProf,
+          cumRate: ((cumProf / cumInv) * 100).toFixed(2)
+        };
+      });
+
+      return { grouped, sorted: result, bestTrade, worstTrade };
+    }
+
+    // Destroy existing charts
+    let profitChartInstance = null;
+    let donutChartInstance = null;
+
+    function renderStatsCharts(sortedStats, allCurrencyStats) {
+      setTimeout(() => {
+        // --- Profit Bar Chart ---
+        const profitCanvas = document.getElementById('profitChart');
+        if (profitCanvas && sortedStats.length > 0) {
+          if (profitChartInstance) profitChartInstance.destroy();
+          const ctx = profitCanvas.getContext('2d');
+          const labels = sortedStats.map(s => s.period);
+          const profits = sortedStats.map(s => Math.round(s.prof));
+          const bgColors = profits.map(v => v >= 0 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.7)');
+          const borderColors = profits.map(v => v >= 0 ? 'rgba(239, 68, 68, 1)' : 'rgba(59, 130, 246, 1)');
+
+          profitChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels,
+              datasets: [{
+                label: '수익금 (원)',
+                data: profits,
+                backgroundColor: bgColors,
+                borderColor: borderColors,
+                borderWidth: 1,
+                borderRadius: 6,
+                maxBarThickness: 40
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: (ctx) => {
+                      const v = ctx.raw;
+                      return `${v >= 0 ? '+' : ''}${(v/10000).toFixed(1)}만원`;
+                    }
+                  }
+                }
+              },
+              scales: {
+                y: {
+                  ticks: {
+                    callback: (v) => (v/10000).toFixed(0) + '만',
+                    font: { size: 10 }
+                  },
+                  grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                x: {
+                  ticks: { font: { size: 9 }, maxRotation: 45 },
+                  grid: { display: false }
+                }
+              }
+            }
+          });
+        }
+
+        // --- Donut Chart (all currencies) ---
+        const donutCanvas = document.getElementById('donutChart');
+        if (donutCanvas && allCurrencyStats.sorted && allCurrencyStats.sorted.length > 0) {
+          if (donutChartInstance) donutChartInstance.destroy();
+          const ctx2 = donutCanvas.getContext('2d');
+
+          // Aggregate totals by currency across all periods
+          const totals = { USD: 0, JPY: 0, EUR: 0, CNY: 0 };
+          allCurrencyStats.sorted.forEach(s => {
+            ['USD', 'JPY', 'EUR', 'CNY'].forEach(c => {
+              totals[c] += Math.abs(s.byCurrencyInv[c] || 0);
+            });
+          });
+
+          const activeCurrencies = Object.entries(totals).filter(([, v]) => v > 0);
+          if (activeCurrencies.length > 0) {
+            const colorMap = {
+              USD: { bg: 'rgba(34, 197, 94, 0.8)', border: 'rgba(34, 197, 94, 1)' },
+              JPY: { bg: 'rgba(239, 68, 68, 0.8)', border: 'rgba(239, 68, 68, 1)' },
+              EUR: { bg: 'rgba(59, 130, 246, 0.8)', border: 'rgba(59, 130, 246, 1)' },
+              CNY: { bg: 'rgba(245, 158, 11, 0.8)', border: 'rgba(245, 158, 11, 1)' }
+            };
+            const flagMap = { USD: '🇺🇸 USD', JPY: '🇯🇵 JPY', EUR: '🇪🇺 EUR', CNY: '🇨🇳 CNY' };
+
+            donutChartInstance = new Chart(ctx2, {
+              type: 'doughnut',
+              data: {
+                labels: activeCurrencies.map(([c]) => flagMap[c]),
+                datasets: [{
+                  data: activeCurrencies.map(([, v]) => v),
+                  backgroundColor: activeCurrencies.map(([c]) => colorMap[c].bg),
+                  borderColor: activeCurrencies.map(([c]) => colorMap[c].border),
+                  borderWidth: 2,
+                  hoverOffset: 8
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '55%',
+                plugins: {
+                  legend: {
+                    position: 'bottom',
+                    labels: { font: { size: 11, weight: 'bold' }, padding: 12, usePointStyle: true }
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: (ctx) => {
+                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                        const pct = ((ctx.raw / total) * 100).toFixed(1);
+                        return `${ctx.label}: ${(ctx.raw/10000).toFixed(0)}만원 (${pct}%)`;
+                      }
+                    }
+                  }
+                }
+              }
+            });
+          }
+        }
+      }, 100);
+    }
+
     function renderStatsPage() {
       const stats = getStats();
       const grade = getGrade();
+      const allStats = getAllCurrencyStats();
+      const bestTrade = allStats.bestTrade;
+      const worstTrade = allStats.worstTrade;
+      const allSorted = allStats.sorted;
+
+      // Trigger chart rendering after DOM update
+      setTimeout(() => renderStatsCharts(allSorted, allStats), 50);
+
+      const periodLabel = state.statsPeriod === 'daily' ? '일별' : state.statsPeriod === 'weekly' ? '주별' : state.statsPeriod === 'monthly' ? '월별' : '년도별';
 
       return `
         <div class="p-4 page-enter">
@@ -2390,6 +2596,40 @@
               </div>
             </div>
           </div>
+
+          <!-- Best / Worst Profit Cards -->
+          ${bestTrade || worstTrade ? `
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              ${bestTrade ? `
+                <div class="bg-white rounded-2xl shadow-sm border border-red-100 p-3 relative overflow-hidden">
+                  <div class="absolute top-0 right-0 w-16 h-16 bg-red-50 rounded-bl-full opacity-60"></div>
+                  <div class="relative">
+                    <div class="flex items-center gap-1.5 mb-2">
+                      <span class="text-base">🏆</span>
+                      <p class="text-[10px] font-bold text-red-500">최고수익</p>
+                    </div>
+                    <p class="text-lg font-extrabold text-red-600">+${fmtMan(bestTrade.profit)}원</p>
+                    <p class="text-[10px] text-gray-500 mt-1">${CURRENCIES[bestTrade.currency]?.flag || ''} ${bestTrade.currency} · ${bestTrade.sellDate || ''}</p>
+                    <p class="text-[10px] font-semibold text-red-400">+${bestTrade.profitRate.toFixed(2)}%</p>
+                  </div>
+                </div>
+              ` : ''}
+              ${worstTrade ? `
+                <div class="bg-white rounded-2xl shadow-sm border border-blue-100 p-3 relative overflow-hidden">
+                  <div class="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full opacity-60"></div>
+                  <div class="relative">
+                    <div class="flex items-center gap-1.5 mb-2">
+                      <span class="text-base">📉</span>
+                      <p class="text-[10px] font-bold text-blue-500">최저수익</p>
+                    </div>
+                    <p class="text-lg font-extrabold ${worstTrade.profit >= 0 ? 'text-red-600' : 'text-blue-600'}">${worstTrade.profit >= 0 ? '+' : ''}${fmtMan(worstTrade.profit)}원</p>
+                    <p class="text-[10px] text-gray-500 mt-1">${CURRENCIES[worstTrade.currency]?.flag || ''} ${worstTrade.currency} · ${worstTrade.sellDate || ''}</p>
+                    <p class="text-[10px] font-semibold ${worstTrade.profitRate >= 0 ? 'text-red-400' : 'text-blue-400'}">${worstTrade.profitRate >= 0 ? '+' : ''}${worstTrade.profitRate.toFixed(2)}%</p>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
 
           <!-- Stats Controls -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
@@ -2427,7 +2667,33 @@
             </div>
           </div>
 
-          <!-- Stats Results -->
+          <!-- Profit Chart -->
+          ${allSorted.length > 0 ? `
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+              <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2 mb-3">
+                <i data-lucide="trending-up" class="w-4 h-4 text-indigo-500"></i>
+                ${periodLabel} 수익금 그래프
+              </h3>
+              <div style="height: 220px; position: relative;">
+                <canvas id="profitChart"></canvas>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Donut Chart - Currency Distribution -->
+          ${allSorted.length > 0 ? `
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+              <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2 mb-3">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-purple-500"></i>
+                ${periodLabel} 전체 통화별 투자 비중
+              </h3>
+              <div style="height: 260px; position: relative;">
+                <canvas id="donutChart"></canvas>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Stats Results (per-currency) -->
           ${stats.length > 0 ? `
             <div class="space-y-3">
               ${stats.map(s => `
