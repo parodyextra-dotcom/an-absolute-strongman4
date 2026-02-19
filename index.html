@@ -277,76 +277,302 @@
 
   <!-- Side Menu -->
   <div id="sideMenu" class="side-menu">
+    <!-- Profile Area -->
     <div class="p-6 pb-4">
       <div class="flex items-center gap-3 mb-1">
-        <div class="w-11 h-11 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-xl flex items-center justify-center shadow-lg">
-          <span class="text-2xl font-black text-white">$</span>
+        <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-full flex items-center justify-center shadow-lg" id="sideProfileAvatar">
+          <i data-lucide="user" class="w-6 h-6 text-white"></i>
         </div>
         <div>
-          <h2 class="text-white font-extrabold text-lg leading-tight">절대강자</h2>
-          <p class="text-indigo-300 text-xs font-medium">분할환전 매니저</p>
+          <h2 class="text-white font-extrabold text-lg leading-tight" id="sideProfileName">게스트</h2>
+          <p class="text-indigo-300 text-xs font-medium" id="sideProfileAge">프로필을 설정하세요</p>
         </div>
       </div>
     </div>
     <div class="side-menu-divider" style="margin-top:0;"></div>
 
-    <div class="side-menu-section-title">메뉴</div>
-    <div class="side-menu-item" data-page="home" onclick="sideMenuNav('home')">
-      <div class="menu-icon"><i data-lucide="home" class="w-[18px] h-[18px]"></i></div>
-      <span>홈 대시보드</span>
+    <!-- Menu Items -->
+    <div class="side-menu-section-title">계정</div>
+    <div class="side-menu-item" onclick="openProfileModal()">
+      <div class="menu-icon"><i data-lucide="user-circle" class="w-[18px] h-[18px]"></i></div>
+      <span>내 프로필</span>
     </div>
-    <div class="side-menu-item" data-page="rate" onclick="sideMenuNav('rate')">
-      <div class="menu-icon"><i data-lucide="trending-up" class="w-[18px] h-[18px]"></i></div>
-      <span>실시간 환율</span>
-    </div>
-    <div class="side-menu-item" data-page="invest" onclick="sideMenuNav('invest')">
-      <div class="menu-icon"><i data-lucide="wallet" class="w-[18px] h-[18px]"></i></div>
-      <span>분할 환전</span>
-    </div>
-    <div class="side-menu-item" data-page="stats" onclick="sideMenuNav('stats')">
-      <div class="menu-icon"><i data-lucide="bar-chart-3" class="w-[18px] h-[18px]"></i></div>
-      <span>투자 통계</span>
-    </div>
-    <div class="side-menu-item" data-page="calc" onclick="sideMenuNav('calc')">
-      <div class="menu-icon"><i data-lucide="calculator" class="w-[18px] h-[18px]"></i></div>
-      <span>환율 계산기</span>
+    <div class="side-menu-item" onclick="openSettingsModal()">
+      <div class="menu-icon"><i data-lucide="settings" class="w-[18px] h-[18px]"></i></div>
+      <span>설정</span>
     </div>
 
     <div class="side-menu-divider"></div>
-    <div class="side-menu-section-title">실시간 환율</div>
-    <div class="px-5 pb-3">
-      <div class="grid grid-cols-2 gap-2">
-        <div class="bg-white/10 rounded-xl p-3 text-center">
-          <div class="text-lg">🇺🇸</div>
-          <div class="text-white font-bold text-sm" id="sideMenuUsd">-</div>
-          <div class="text-indigo-300 text-[10px]">USD/KRW</div>
-        </div>
-        <div class="bg-white/10 rounded-xl p-3 text-center">
-          <div class="text-lg">🇯🇵</div>
-          <div class="text-white font-bold text-sm" id="sideMenuJpy">-</div>
-          <div class="text-indigo-300 text-[10px]">100JPY/KRW</div>
-        </div>
-        <div class="bg-white/10 rounded-xl p-3 text-center">
-          <div class="text-lg">🇪🇺</div>
-          <div class="text-white font-bold text-sm" id="sideMenuEur">-</div>
-          <div class="text-indigo-300 text-[10px]">EUR/KRW</div>
-        </div>
-        <div class="bg-white/10 rounded-xl p-3 text-center">
-          <div class="text-lg">🇨🇳</div>
-          <div class="text-white font-bold text-sm" id="sideMenuCny">-</div>
-          <div class="text-indigo-300 text-[10px]">CNY/KRW</div>
-        </div>
+    <div class="side-menu-section-title">서비스</div>
+    <div class="side-menu-item" onclick="toggleAdFree()">
+      <div class="menu-icon"><i data-lucide="shield-off" class="w-[18px] h-[18px]"></i></div>
+      <span>광고 끄기</span>
+      <div id="adFreeToggle" class="ml-auto w-10 h-5 rounded-full bg-white/20 relative transition-all cursor-pointer" style="flex-shrink:0;">
+        <div class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-all" id="adFreeToggleCircle"></div>
       </div>
     </div>
+    <div class="side-menu-item" onclick="openAppRating()">
+      <div class="menu-icon"><i data-lucide="star" class="w-[18px] h-[18px]"></i></div>
+      <span>앱 별점주기</span>
+    </div>
+    <div class="side-menu-item" onclick="shareApp()">
+      <div class="menu-icon"><i data-lucide="share-2" class="w-[18px] h-[18px]"></i></div>
+      <span>친구와 공유하기</span>
+    </div>
 
     <div class="side-menu-divider"></div>
-    <div class="side-menu-section-title">정보</div>
-    <div class="side-menu-item" onclick="closeSideMenu()" style="cursor:default;">
-      <div class="menu-icon"><i data-lucide="info" class="w-[18px] h-[18px]"></i></div>
-      <span class="text-sm">v2.0 · 절대강자 분할환전</span>
+    <div class="side-menu-section-title">안내</div>
+    <div class="side-menu-item" onclick="openUsageGuide()">
+      <div class="menu-icon"><i data-lucide="book-open" class="w-[18px] h-[18px]"></i></div>
+      <span>사용방법</span>
     </div>
-    <div id="sideMenuLastUpdated" class="px-6 pb-6 text-indigo-400 text-[11px]">
-      마지막 업데이트: -
+    <div class="side-menu-item" onclick="openPrivacyPolicy()">
+      <div class="menu-icon"><i data-lucide="shield" class="w-[18px] h-[18px]"></i></div>
+      <span>개인정보처리방침</span>
+    </div>
+    <div class="side-menu-item" onclick="openTermsOfService()">
+      <div class="menu-icon"><i data-lucide="file-text" class="w-[18px] h-[18px]"></i></div>
+      <span>이용약관</span>
+    </div>
+
+    <!-- Bottom Info -->
+    <div class="mt-auto p-5">
+      <div class="side-menu-divider" style="margin:0 0 12px 0;"></div>
+      <div class="flex items-center gap-2 text-indigo-400 text-[11px]">
+        <i data-lucide="info" class="w-3 h-3"></i>
+        <span>v2.0 · 절대강자 분할환전</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeProfileModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-center">
+        <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
+          <i data-lucide="user" class="w-10 h-10 text-white"></i>
+        </div>
+        <h3 class="text-white font-bold text-lg">내 프로필</h3>
+        <p class="text-indigo-200 text-xs mt-1">프로필 정보를 설정하세요</p>
+      </div>
+      <div class="p-6 space-y-4">
+        <!-- Nickname -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">별명 <span class="text-gray-400 font-normal text-xs">(4자 이하)</span></label>
+          <input type="text" id="profileNickname" maxlength="4" placeholder="별명 입력" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-gray-50">
+        </div>
+        <!-- Age -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">나이</label>
+          <select id="profileAge" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-gray-50 appearance-none" style="background-image: url('data:image/svg+xml;utf8,<svg fill=\"gray\" viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>'); background-repeat: no-repeat; background-position: right 12px center; background-size: 20px;">
+            <option value="">선택하세요</option>
+            <option value="10대">10대</option>
+            <option value="20대">20대</option>
+            <option value="30대">30대</option>
+            <option value="40대">40대</option>
+            <option value="50대">50대</option>
+            <option value="60대">60대</option>
+            <option value="70대">70대</option>
+            <option value="80대">80대</option>
+            <option value="90대">90대</option>
+          </select>
+        </div>
+        <!-- Google Login -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">소셜 로그인</label>
+          <button onclick="googleLoginPlaceholder()" class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">
+            <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+            <span class="text-sm font-medium text-gray-600">Google 계정으로 로그인</span>
+          </button>
+          <p class="text-[11px] text-gray-400 mt-1.5 text-center">추후 업데이트 예정</p>
+        </div>
+      </div>
+      <div class="px-6 pb-6 flex gap-3">
+        <button onclick="closeProfileModal()" class="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">취소</button>
+        <button onclick="saveProfile()" class="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all shadow-lg">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeSettingsModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 flex items-center justify-between">
+        <h3 class="text-white font-bold text-lg flex items-center gap-2">
+          <i data-lucide="settings" class="w-5 h-5"></i> 설정
+        </h3>
+        <button onclick="closeSettingsModal()" class="text-white/70 hover:text-white transition-all">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-5 space-y-3">
+        <!-- Backup Data -->
+        <button onclick="backupDataJSON()" class="w-full flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 transition-all group">
+          <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition-all">
+            <i data-lucide="download" class="w-5 h-5 text-blue-600"></i>
+          </div>
+          <div class="text-left">
+            <div class="text-sm font-semibold text-gray-800">데이터 백업</div>
+            <div class="text-[11px] text-gray-400">JSON 파일로 내보내기</div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 ml-auto"></i>
+        </button>
+        <!-- Import Data -->
+        <button onclick="document.getElementById('importFileInput').click()" class="w-full flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:bg-green-50 hover:border-green-200 transition-all group">
+          <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-200 transition-all">
+            <i data-lucide="upload" class="w-5 h-5 text-green-600"></i>
+          </div>
+          <div class="text-left">
+            <div class="text-sm font-semibold text-gray-800">데이터 가져오기</div>
+            <div class="text-[11px] text-gray-400">JSON 파일에서 복원</div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 ml-auto"></i>
+        </button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importDataJSON(event)">
+        <!-- Delete All Data -->
+        <button onclick="confirmDeleteAllData()" class="w-full flex items-center gap-4 p-4 rounded-xl border border-red-200 hover:bg-red-50 transition-all group">
+          <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center group-hover:bg-red-200 transition-all">
+            <i data-lucide="trash-2" class="w-5 h-5 text-red-600"></i>
+          </div>
+          <div class="text-left">
+            <div class="text-sm font-semibold text-red-600">모든 데이터 삭제</div>
+            <div class="text-[11px] text-gray-400">모든 환전 기록을 삭제합니다</div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 ml-auto"></i>
+        </button>
+      </div>
+      <div class="px-5 pb-5">
+        <button onclick="closeSettingsModal()" class="w-full py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Usage Guide Modal -->
+  <div id="usageGuideModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeUsageGuide()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="max-height:85vh;">
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 flex items-center justify-between">
+        <h3 class="text-white font-bold text-lg flex items-center gap-2">
+          <i data-lucide="book-open" class="w-5 h-5"></i> 사용방법
+        </h3>
+        <button onclick="closeUsageGuide()" class="text-white/70 hover:text-white transition-all">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-5 space-y-4 overflow-y-auto" style="max-height: calc(85vh - 130px);">
+        <div class="flex gap-3">
+          <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-indigo-600 font-bold text-sm">1</span></div>
+          <div><h4 class="text-sm font-bold text-gray-800">초기 예산 설정</h4><p class="text-xs text-gray-500 mt-1">홈 화면에서 총 투자 예산을 설정합니다. 예산은 언제든 수정할 수 있습니다.</p></div>
+        </div>
+        <div class="flex gap-3">
+          <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-indigo-600 font-bold text-sm">2</span></div>
+          <div><h4 class="text-sm font-bold text-gray-800">통화 선택</h4><p class="text-xs text-gray-500 mt-1">USD, JPY, EUR, CNY 중 원하는 통화를 선택합니다.</p></div>
+        </div>
+        <div class="flex gap-3">
+          <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-indigo-600 font-bold text-sm">3</span></div>
+          <div><h4 class="text-sm font-bold text-gray-800">분할 매수</h4><p class="text-xs text-gray-500 mt-1">환율이 유리할 때 분할하여 외화를 매수합니다. 한 번에 모든 예산을 투입하지 않고 나누어 환전하세요.</p></div>
+        </div>
+        <div class="flex gap-3">
+          <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-green-600 font-bold text-sm">4</span></div>
+          <div><h4 class="text-sm font-bold text-gray-800">환전 (매도)</h4><p class="text-xs text-gray-500 mt-1">목표 환율에 도달하면 매도하여 수익을 실현합니다. 자동 매도 기능도 활용하세요.</p></div>
+        </div>
+        <div class="flex gap-3">
+          <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-purple-600 font-bold text-sm">5</span></div>
+          <div><h4 class="text-sm font-bold text-gray-800">통계 확인</h4><p class="text-xs text-gray-500 mt-1">투자 통계에서 전체 수익률, 거래 내역 등을 확인합니다.</p></div>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-3">
+          <p class="text-xs text-amber-700 font-medium">💡 Tip: 목표 매수 환율을 설정하면 현재 환율이 목표에 도달했을 때 알림을 받을 수 있습니다.</p>
+        </div>
+      </div>
+      <div class="px-5 pb-5 pt-3">
+        <button onclick="closeUsageGuide()" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Policy Modal -->
+  <div id="privacyPolicyModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePrivacyPolicy()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="max-height:85vh;">
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 flex items-center justify-between">
+        <h3 class="text-white font-bold text-lg flex items-center gap-2">
+          <i data-lucide="shield" class="w-5 h-5"></i> 개인정보처리방침
+        </h3>
+        <button onclick="closePrivacyPolicy()" class="text-white/70 hover:text-white transition-all">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-5 overflow-y-auto space-y-4" style="max-height: calc(85vh - 130px);">
+        <div>
+          <h4 class="text-sm font-bold text-gray-800 mb-2">1. 수집하는 개인정보</h4>
+          <p class="text-xs text-gray-600 leading-relaxed">본 앱은 사용자가 자발적으로 입력한 별명, 나이대 정보만을 기기 내(localStorage)에 저장하며, 별도의 서버로 전송하지 않습니다.</p>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-gray-800 mb-2">2. 개인정보의 이용 목적</h4>
+          <p class="text-xs text-gray-600 leading-relaxed">수집된 정보는 앱 내 프로필 표시 목적으로만 사용되며, 마케팅 또는 제3자 제공에 활용되지 않습니다.</p>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-gray-800 mb-2">3. 개인정보의 보관 및 파기</h4>
+          <p class="text-xs text-gray-600 leading-relaxed">모든 데이터는 사용자의 기기에만 저장됩니다. 앱 삭제 또는 브라우저 데이터 초기화 시 자동으로 파기됩니다. 설정에서 직접 삭제할 수도 있습니다.</p>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-gray-800 mb-2">4. 제3자 제공</h4>
+          <p class="text-xs text-gray-600 leading-relaxed">본 앱은 사용자의 개인정보를 제3자에게 제공하지 않습니다.</p>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-gray-800 mb-2">5. 문의</h4>
+          <p class="text-xs text-gray-600 leading-relaxed">개인정보 관련 문의사항은 앱 내 피드백 기능을 통해 문의해 주세요.</p>
+        </div>
+      </div>
+      <div class="px-5 pb-5 pt-3">
+        <button onclick="closePrivacyPolicy()" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms of Service Modal -->
+  <div id="termsModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeTermsOfService()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="max-height:85vh;">
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 flex items-center justify-between">
+        <h3 class="text-white font-bold text-lg flex items-center gap-2">
+          <i data-lucide="file-text" class="w-5 h-5"></i> 이용약관
+        </h3>
+        <button onclick="closeTermsOfService()" class="text-white/70 hover:text-white transition-all">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-5 overflow-y-auto space-y-4" style="max-height: calc(85vh - 130px);">
+        <div>
+          <h4 class="text-sm font-bold text-gray-800 mb-2">제1조 (목적)</h4>
+          <p class="text-xs text-gray-600 leading-relaxed">이 약관은 「절대강자 분할환전」 앱 서비스의 이용에 관한 기본적인 사항을 규정함을 목적으로 합니다.</p>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-gray-800 mb-2">제2조 (서비스 내용)</h4>
+          <p class="text-xs text-gray-600 leading-relaxed">본 앱은 외화 분할 환전 시뮬레이션 및 환율 정보 제공 서비스를 제공합니다. 실제 금융 거래를 중개하거나 처리하지 않습니다.</p>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-gray-800 mb-2">제3조 (면책 조항)</h4>
+          <p class="text-xs text-gray-600 leading-relaxed">본 앱에서 제공하는 환율 정보는 참고용이며, 실제 금융 거래 시 발생하는 손실에 대해 책임지지 않습니다. 투자 결정은 사용자 본인의 판단과 책임하에 이루어져야 합니다.</p>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-gray-800 mb-2">제4조 (데이터)</h4>
+          <p class="text-xs text-gray-600 leading-relaxed">모든 사용자 데이터는 기기 내에 저장되며, 기기 변경 또는 데이터 초기화 시 복구가 불가능합니다. 정기적인 백업을 권장합니다.</p>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-gray-800 mb-2">제5조 (지적재산권)</h4>
+          <p class="text-xs text-gray-600 leading-relaxed">본 앱의 디자인, 코드, 콘텐츠에 대한 지적재산권은 개발자에게 있으며, 무단 복제 및 배포를 금합니다.</p>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-gray-800 mb-2">제6조 (약관의 변경)</h4>
+          <p class="text-xs text-gray-600 leading-relaxed">본 약관은 서비스 개선에 따라 변경될 수 있으며, 변경 시 앱 내 공지합니다.</p>
+        </div>
+      </div>
+      <div class="px-5 pb-5 pt-3">
+        <button onclick="closeTermsOfService()" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all">확인</button>
+      </div>
     </div>
   </div>
 
@@ -1031,28 +1257,300 @@
     }
 
     function updateSideMenuRates() {
-      const usdEl = document.getElementById('sideMenuUsd');
-      const jpyEl = document.getElementById('sideMenuJpy');
-      const eurEl = document.getElementById('sideMenuEur');
-      const cnyEl = document.getElementById('sideMenuCny');
-      const updEl = document.getElementById('sideMenuLastUpdated');
-      if (usdEl) usdEl.textContent = state.usdRate.toFixed(1) + '원';
-      if (jpyEl) jpyEl.textContent = state.jpyRate.toFixed(2) + '원';
-      if (eurEl) eurEl.textContent = state.eurRate.toFixed(2) + '원';
-      if (cnyEl) cnyEl.textContent = state.cnyRate.toFixed(2) + '원';
-      if (updEl) {
-        updEl.textContent = state.lastUpdated 
-          ? '마지막 업데이트: ' + state.lastUpdated.toLocaleTimeString('ko-KR')
-          : '마지막 업데이트: -';
+      // Update profile display in side menu
+      updateSideMenuProfile();
+    }
+
+    // ==========================================
+    // PROFILE FUNCTIONS
+    // ==========================================
+    function loadProfile() {
+      try {
+        const saved = localStorage.getItem('userProfile');
+        if (saved) return JSON.parse(saved);
+      } catch(e) {}
+      return { nickname: '', age: '' };
+    }
+
+    function updateSideMenuProfile() {
+      const profile = loadProfile();
+      const nameEl = document.getElementById('sideProfileName');
+      const ageEl = document.getElementById('sideProfileAge');
+      if (nameEl) nameEl.textContent = profile.nickname || '게스트';
+      if (ageEl) ageEl.textContent = profile.age ? profile.age : '프로필을 설정하세요';
+    }
+
+    function openProfileModal() {
+      closeSideMenu();
+      setTimeout(() => {
+        const profile = loadProfile();
+        document.getElementById('profileNickname').value = profile.nickname || '';
+        document.getElementById('profileAge').value = profile.age || '';
+        document.getElementById('profileModal').style.display = 'flex';
+        lucide.createIcons();
+      }, 200);
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModal').style.display = 'none';
+    }
+
+    function saveProfile() {
+      const nickname = document.getElementById('profileNickname').value.trim();
+      const age = document.getElementById('profileAge').value;
+      if (nickname && nickname.length > 4) {
+        alert('별명은 4자 이하로 입력해주세요.');
+        return;
       }
-      // Update active menu item
-      document.querySelectorAll('.side-menu-item[data-page]').forEach(item => {
-        if (item.dataset.page === state.currentPage) {
-          item.classList.add('active');
-        } else {
-          item.classList.remove('active');
+      const profile = { nickname, age };
+      localStorage.setItem('userProfile', JSON.stringify(profile));
+      updateSideMenuProfile();
+      closeProfileModal();
+      showToast('프로필이 저장되었습니다 ✅');
+    }
+
+    function googleLoginPlaceholder() {
+      showToast('Google 로그인은 추후 업데이트 예정입니다 🔜');
+    }
+
+    // ==========================================
+    // SETTINGS FUNCTIONS
+    // ==========================================
+    function openSettingsModal() {
+      closeSideMenu();
+      setTimeout(() => {
+        document.getElementById('settingsModal').style.display = 'flex';
+        lucide.createIcons();
+      }, 200);
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    function backupDataJSON() {
+      const data = {
+        usdPhases: state.usdPhases,
+        jpyPhases: state.jpyPhases,
+        eurPhases: state.eurPhases,
+        cnyPhases: state.cnyPhases,
+        usdNextId: state.usdNextId,
+        jpyNextId: state.jpyNextId,
+        eurNextId: state.eurNextId,
+        cnyNextId: state.cnyNextId,
+        usdRate: state.usdRate,
+        jpyRate: state.jpyRate,
+        eurRate: state.eurRate,
+        cnyRate: state.cnyRate,
+        initialBudget: state.initialBudget,
+        targetBuyRate_USD: state.targetBuyRate_USD,
+        targetBuyRate_JPY: state.targetBuyRate_JPY,
+        targetBuyRate_EUR: state.targetBuyRate_EUR,
+        targetBuyRate_CNY: state.targetBuyRate_CNY,
+        userProfile: loadProfile(),
+        exportDate: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `절대강자_백업_${new Date().toLocaleDateString('ko-KR').replace(/\./g, '').replace(/\s/g, '_')}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('데이터가 백업되었습니다 💾');
+    }
+
+    function importDataJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.usdPhases) state.usdPhases = data.usdPhases;
+          if (data.jpyPhases) state.jpyPhases = data.jpyPhases;
+          if (data.eurPhases) state.eurPhases = data.eurPhases;
+          if (data.cnyPhases) state.cnyPhases = data.cnyPhases;
+          if (data.usdNextId) state.usdNextId = data.usdNextId;
+          if (data.jpyNextId) state.jpyNextId = data.jpyNextId;
+          if (data.eurNextId) state.eurNextId = data.eurNextId;
+          if (data.cnyNextId) state.cnyNextId = data.cnyNextId;
+          if (data.usdRate) state.usdRate = data.usdRate;
+          if (data.jpyRate) state.jpyRate = data.jpyRate;
+          if (data.eurRate) state.eurRate = data.eurRate;
+          if (data.cnyRate) state.cnyRate = data.cnyRate;
+          if (data.initialBudget !== undefined) state.initialBudget = data.initialBudget;
+          if (data.targetBuyRate_USD !== undefined) state.targetBuyRate_USD = data.targetBuyRate_USD;
+          if (data.targetBuyRate_JPY !== undefined) state.targetBuyRate_JPY = data.targetBuyRate_JPY;
+          if (data.targetBuyRate_EUR !== undefined) state.targetBuyRate_EUR = data.targetBuyRate_EUR;
+          if (data.targetBuyRate_CNY !== undefined) state.targetBuyRate_CNY = data.targetBuyRate_CNY;
+          if (data.userProfile) {
+            localStorage.setItem('userProfile', JSON.stringify(data.userProfile));
+          }
+          saveToStorage();
+          render();
+          closeSettingsModal();
+          showToast('데이터를 성공적으로 복원했습니다 ✅');
+        } catch (err) {
+          alert('올바른 JSON 파일이 아닙니다.');
         }
-      });
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function confirmDeleteAllData() {
+      if (!confirm('⚠️ 정말로 모든 데이터를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.\n삭제 전 백업을 권장합니다.')) return;
+      if (!confirm('❗ 마지막 확인\n\n모든 환전 기록, 설정, 프로필이 삭제됩니다.\n정말 삭제하시겠습니까?')) return;
+      localStorage.removeItem('currencyPortfolio');
+      localStorage.removeItem('userProfile');
+      localStorage.removeItem('adFree');
+      state.usdPhases = [];
+      state.jpyPhases = [];
+      state.eurPhases = [];
+      state.cnyPhases = [];
+      state.usdNextId = 1;
+      state.jpyNextId = 1;
+      state.eurNextId = 1;
+      state.cnyNextId = 1;
+      state.initialBudget = 10000000;
+      state.targetBuyRate_USD = '';
+      state.targetBuyRate_JPY = '';
+      state.targetBuyRate_EUR = '';
+      state.targetBuyRate_CNY = '';
+      render();
+      closeSettingsModal();
+      showToast('모든 데이터가 삭제되었습니다 🗑️');
+    }
+
+    // ==========================================
+    // AD-FREE TOGGLE
+    // ==========================================
+    function toggleAdFree() {
+      const isAdFree = localStorage.getItem('adFree') === 'true';
+      localStorage.setItem('adFree', !isAdFree ? 'true' : 'false');
+      updateAdFreeUI();
+      if (!isAdFree) {
+        showToast('광고가 꺼졌습니다 🔇');
+      } else {
+        showToast('광고가 켜졌습니다');
+      }
+    }
+
+    function updateAdFreeUI() {
+      const isAdFree = localStorage.getItem('adFree') === 'true';
+      const toggle = document.getElementById('adFreeToggle');
+      const circle = document.getElementById('adFreeToggleCircle');
+      if (toggle && circle) {
+        if (isAdFree) {
+          toggle.style.background = 'rgba(99, 102, 241, 0.8)';
+          circle.style.transform = 'translateX(20px)';
+        } else {
+          toggle.style.background = 'rgba(255,255,255,0.2)';
+          circle.style.transform = 'translateX(0)';
+        }
+      }
+    }
+
+    // ==========================================
+    // APP RATING
+    // ==========================================
+    function openAppRating() {
+      closeSideMenu();
+      setTimeout(() => {
+        showToast('앱 스토어 별점 기능은 앱 배포 후 활성화됩니다 ⭐');
+      }, 200);
+    }
+
+    // ==========================================
+    // SHARE APP
+    // ==========================================
+    function shareApp() {
+      closeSideMenu();
+      setTimeout(() => {
+        const shareData = {
+          title: '절대강자 분할환전',
+          text: '스마트한 분할 환전 매니저 앱! 환율 변동에 따른 분할 매수/매도로 수익을 극대화하세요.',
+          url: window.location.href
+        };
+        if (navigator.share) {
+          navigator.share(shareData).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(window.location.href).then(() => {
+            showToast('링크가 클립보드에 복사되었습니다 📋');
+          }).catch(() => {
+            prompt('아래 링크를 복사하세요:', window.location.href);
+          });
+        }
+      }, 200);
+    }
+
+    // ==========================================
+    // USAGE GUIDE MODAL
+    // ==========================================
+    function openUsageGuide() {
+      closeSideMenu();
+      setTimeout(() => {
+        document.getElementById('usageGuideModal').style.display = 'flex';
+        lucide.createIcons();
+      }, 200);
+    }
+
+    function closeUsageGuide() {
+      document.getElementById('usageGuideModal').style.display = 'none';
+    }
+
+    // ==========================================
+    // PRIVACY POLICY MODAL
+    // ==========================================
+    function openPrivacyPolicy() {
+      closeSideMenu();
+      setTimeout(() => {
+        document.getElementById('privacyPolicyModal').style.display = 'flex';
+        lucide.createIcons();
+      }, 200);
+    }
+
+    function closePrivacyPolicy() {
+      document.getElementById('privacyPolicyModal').style.display = 'none';
+    }
+
+    // ==========================================
+    // TERMS OF SERVICE MODAL
+    // ==========================================
+    function openTermsOfService() {
+      closeSideMenu();
+      setTimeout(() => {
+        document.getElementById('termsModal').style.display = 'flex';
+        lucide.createIcons();
+      }, 200);
+    }
+
+    function closeTermsOfService() {
+      document.getElementById('termsModal').style.display = 'none';
+    }
+
+    // ==========================================
+    // TOAST NOTIFICATION
+    // ==========================================
+    function showToast(message) {
+      let toast = document.getElementById('globalToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'globalToast';
+        toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);z-index:99999;background:rgba(30,27,75,0.95);color:white;padding:12px 24px;border-radius:16px;font-size:14px;font-weight:600;opacity:0;transition:all 0.3s ease;white-space:nowrap;backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0,0,0,0.3);';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = message;
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(20px)';
+      }, 2500);
     }
 
     // ==========================================
@@ -2007,6 +2505,7 @@
       overlay.classList.add('active');
       document.body.style.overflow = 'hidden';
       updateSideMenuRates();
+      updateAdFreeUI();
       lucide.createIcons();
     }
 
@@ -2068,6 +2567,7 @@
     loadFromStorage();
     fetchRate();
     render();
+    updateSideMenuProfile();
 
     // Auto refresh rate every 10 minutes
     setInterval(fetchRate, 600000);
