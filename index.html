@@ -211,6 +211,27 @@
       50% { opacity: 1; transform: scale(1.05); }
     }
 
+    /* In-app notification toast animations */
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideUp {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-20px); }
+    }
+
+    /* Notification bell shake */
+    @keyframes bellShake {
+      0%, 100% { transform: rotate(0deg); }
+      15% { transform: rotate(15deg); }
+      30% { transform: rotate(-10deg); }
+      45% { transform: rotate(12deg); }
+      60% { transform: rotate(-8deg); }
+      75% { transform: rotate(5deg); }
+    }
+    .bell-shake { animation: bellShake 0.8s ease-in-out; }
+
     /* Rate card enhanced styling */
     .rate-card-glow {
       background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 50%, #f5f3ff 100%);
@@ -824,7 +845,7 @@
           <div><h4 class="text-sm font-bold text-gray-800">통계 확인</h4><p class="text-xs text-gray-500 mt-1">투자 통계에서 전체 수익률, 거래 내역 등을 확인합니다.</p></div>
         </div>
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-3">
-          <p class="text-xs text-amber-700 font-medium">💡 Tip: 목표 매수 환율을 설정하면 현재 환율이 목표에 도달했을 때 알림을 받을 수 있습니다.</p>
+          <p class="text-xs text-amber-700 font-medium">💡 Tip: 목표 매수/매도 환율을 설정하면 현재 환율이 목표에 도달했을 때 브라우저 푸시 알림을 받을 수 있습니다.</p>
         </div>
       </div>
       <div class="px-5 pb-5 pt-3">
@@ -1099,7 +1120,16 @@
       targetBuyRate_USD: '',
       targetBuyRate_JPY: '',
       targetBuyRate_EUR: '',
-      targetBuyRate_CNY: ''
+      targetBuyRate_CNY: '',
+      // NEW: Target sell rates per currency
+      targetSellRate_USD: '',
+      targetSellRate_JPY: '',
+      targetSellRate_EUR: '',
+      targetSellRate_CNY: '',
+      // Notification state
+      notificationsEnabled: false,
+      lastBuyNotified: {},  // { USD: timestamp, ... }
+      lastSellNotified: {}  // { USD: timestamp, ... }
     };
 
     // ==========================================
@@ -1177,7 +1207,151 @@
     }
     function setTargetBuyRate(currency, value) {
       state[`targetBuyRate_${currency}`] = value;
+      // Reset notification when target changes
+      delete state.lastBuyNotified[currency];
       saveToStorage();
+    }
+
+    // Target sell rate helpers
+    function getTargetSellRate(currency) {
+      const val = state[`targetSellRate_${currency || state.activeTab}`];
+      return val !== '' ? parseFloat(val) : null;
+    }
+    function setTargetSellRate(currency, value) {
+      state[`targetSellRate_${currency}`] = value;
+      // Reset notification when target changes
+      delete state.lastSellNotified[currency];
+      saveToStorage();
+    }
+
+    // ==========================================
+    // NOTIFICATION SYSTEM
+    // ==========================================
+    function requestNotificationPermission() {
+      if (!('Notification' in window)) {
+        showInAppNotification('⚠️ 이 브라우저는 알림을 지원하지 않습니다.', 'warning');
+        return;
+      }
+      if (Notification.permission === 'granted') {
+        state.notificationsEnabled = true;
+        saveToStorage();
+        showInAppNotification('✅ 알림이 활성화되었습니다!', 'success');
+        render();
+        return;
+      }
+      if (Notification.permission === 'denied') {
+        showInAppNotification('❌ 알림 권한이 차단되어 있습니다.\n브라우저 설정에서 알림을 허용해주세요.', 'error');
+        return;
+      }
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          state.notificationsEnabled = true;
+          saveToStorage();
+          showInAppNotification('✅ 알림이 활성화되었습니다!', 'success');
+          render();
+        } else {
+          showInAppNotification('알림 권한이 거부되었습니다.', 'warning');
+        }
+      });
+    }
+
+    function disableNotifications() {
+      state.notificationsEnabled = false;
+      saveToStorage();
+      showInAppNotification('🔕 알림이 비활성화되었습니다.', 'info');
+      render();
+    }
+
+    function sendBrowserNotification(title, body, tag) {
+      if (!state.notificationsEnabled) return;
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      try {
+        const n = new Notification(title, {
+          body: body,
+          icon: 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%27%234f46e5%27/%3E%3Ctext x=%2732%27 y=%2742%27 font-size=%2736%27 text-anchor=%27middle%27 fill=%27white%27%3E💱%3C/text%3E%3C/svg%3E',
+          tag: tag || 'rate-alert',
+          renotify: true,
+          vibrate: [200, 100, 200]
+        });
+        n.onclick = () => {
+          window.focus();
+          n.close();
+        };
+        // Auto close after 10 seconds
+        setTimeout(() => n.close(), 10000);
+      } catch(e) {
+        console.error('Notification error:', e);
+      }
+    }
+
+    // In-app notification toast
+    function showInAppNotification(message, type = 'info') {
+      const existing = document.getElementById('inAppNotif');
+      if (existing) existing.remove();
+
+      const colors = {
+        success: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white',
+        error: 'bg-gradient-to-r from-red-500 to-rose-500 text-white',
+        warning: 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white',
+        info: 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white',
+        buy: 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white',
+        sell: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+      };
+
+      const toast = document.createElement('div');
+      toast.id = 'inAppNotif';
+      toast.className = `fixed top-16 left-4 right-4 z-[10000] ${colors[type] || colors.info} px-4 py-3 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-3`;
+      toast.style.animation = 'slideDown 0.3s ease-out';
+      toast.innerHTML = `
+        <span class="flex-1">${message}</span>
+        <button onclick="this.parentElement.remove()" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors flex-shrink-0">
+          <span class="text-lg">✕</span>
+        </button>
+      `;
+      document.body.appendChild(toast);
+
+      // Auto dismiss after 5 seconds
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.style.animation = 'slideUp 0.3s ease-in forwards';
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, 5000);
+    }
+
+    // Check all target rates and send notifications
+    function checkTargetRateNotifications() {
+      const now = Date.now();
+      const COOLDOWN = 600000; // 10 minutes cooldown between same notifications
+
+      Object.keys(CURRENCIES).forEach(cur => {
+        const currentRate = getRateForCurrency(cur);
+        const ci = CURRENCIES[cur];
+
+        // Check buy target
+        const targetBuy = getTargetBuyRate(cur);
+        if (targetBuy !== null && currentRate <= targetBuy) {
+          const lastNotified = state.lastBuyNotified[cur] || 0;
+          if (now - lastNotified > COOLDOWN) {
+            state.lastBuyNotified[cur] = now;
+            const msg = `${ci.flag} ${ci.name} 매수 타이밍! 현재 ${currentRate.toFixed(ci.decimals)}원 ≤ 목표 ${targetBuy}원`;
+            sendBrowserNotification('🔔 매수 목표환율 도달!', msg, `buy-${cur}`);
+            showInAppNotification(`🔔 ${msg}`, 'buy');
+          }
+        }
+
+        // Check sell target
+        const targetSell = getTargetSellRate(cur);
+        if (targetSell !== null && currentRate >= targetSell) {
+          const lastNotified = state.lastSellNotified[cur] || 0;
+          if (now - lastNotified > COOLDOWN) {
+            state.lastSellNotified[cur] = now;
+            const msg = `${ci.flag} ${ci.name} 매도 타이밍! 현재 ${currentRate.toFixed(ci.decimals)}원 ≥ 목표 ${targetSell}원`;
+            sendBrowserNotification('💰 매도 목표환율 도달!', msg, `sell-${cur}`);
+            showInAppNotification(`💰 ${msg}`, 'sell');
+          }
+        }
+      });
     }
 
     // JPY: amount is in KRW, buyRate is per 100 JPY
@@ -1211,6 +1385,8 @@
       } finally {
         state.isLoadingRate = false;
         render();
+        // Check target rates and send notifications
+        checkTargetRateNotifications();
       }
     }
 
@@ -1243,7 +1419,12 @@
         targetBuyRate_USD: state.targetBuyRate_USD,
         targetBuyRate_JPY: state.targetBuyRate_JPY,
         targetBuyRate_EUR: state.targetBuyRate_EUR,
-        targetBuyRate_CNY: state.targetBuyRate_CNY
+        targetBuyRate_CNY: state.targetBuyRate_CNY,
+        targetSellRate_USD: state.targetSellRate_USD,
+        targetSellRate_JPY: state.targetSellRate_JPY,
+        targetSellRate_EUR: state.targetSellRate_EUR,
+        targetSellRate_CNY: state.targetSellRate_CNY,
+        notificationsEnabled: state.notificationsEnabled
       };
       localStorage.setItem('currencyPortfolio', JSON.stringify(data));
     }
@@ -1273,6 +1454,13 @@
           if (data.targetBuyRate_JPY !== undefined) state.targetBuyRate_JPY = data.targetBuyRate_JPY;
           if (data.targetBuyRate_EUR !== undefined) state.targetBuyRate_EUR = data.targetBuyRate_EUR;
           if (data.targetBuyRate_CNY !== undefined) state.targetBuyRate_CNY = data.targetBuyRate_CNY;
+          // Load target sell rates
+          if (data.targetSellRate_USD !== undefined) state.targetSellRate_USD = data.targetSellRate_USD;
+          if (data.targetSellRate_JPY !== undefined) state.targetSellRate_JPY = data.targetSellRate_JPY;
+          if (data.targetSellRate_EUR !== undefined) state.targetSellRate_EUR = data.targetSellRate_EUR;
+          if (data.targetSellRate_CNY !== undefined) state.targetSellRate_CNY = data.targetSellRate_CNY;
+          // Load notification preference
+          if (data.notificationsEnabled !== undefined) state.notificationsEnabled = data.notificationsEnabled;
         } catch (e) {
           console.error(e);
         }
@@ -1712,6 +1900,7 @@
       state.isEditingRate = false;
       saveToStorage();
       checkAutoSell();
+      checkTargetRateNotifications();
       render();
     }
 
@@ -2369,11 +2558,16 @@
 
       // Check buy timing for each currency
       const buySignals = [];
+      const sellSignals = [];
       Object.keys(CURRENCIES).forEach(cur => {
         const target = getTargetBuyRate(cur);
         const currentR = getRateForCurrency(cur);
         if (target !== null && currentR <= target) {
           buySignals.push(cur);
+        }
+        const targetS = getTargetSellRate(cur);
+        if (targetS !== null && currentR >= targetS) {
+          sellSignals.push(cur);
         }
       });
 
@@ -2426,6 +2620,23 @@
               ${buySignals.map(cur => `
                 <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold golden-flash-badge">
                   ${CURRENCIES[cur].flag} ${cur} ${getRateForCurrency(cur).toFixed(CURRENCIES[cur].decimals)}원 ≤ 목표 ${getTargetBuyRate(cur)}원
+                </span>
+              `).join('')}
+            </div>
+          </div>
+          ` : ''}
+
+          ${sellSignals.length > 0 ? `
+          <!-- Sell Signal Alert -->
+          <div class="green-flash rounded-2xl p-4 mb-4 bg-gradient-to-r from-green-50 to-emerald-50">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xl green-flash-badge">💰</span>
+              <p class="text-sm font-extrabold text-green-800">매도 타이밍!</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              ${sellSignals.map(cur => `
+                <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-100 text-green-800 text-xs font-bold green-flash-badge">
+                  ${CURRENCIES[cur].flag} ${cur} ${getRateForCurrency(cur).toFixed(CURRENCIES[cur].decimals)}원 ≥ 목표 ${getTargetSellRate(cur)}원
                 </span>
               `).join('')}
             </div>
@@ -2669,6 +2880,10 @@
       const targetBuy = getTargetBuyRate(cur);
       const isBuyTiming = targetBuy !== null && currentRate <= targetBuy;
 
+      // Target sell rate check
+      const targetSell = getTargetSellRate(cur);
+      const isSellTiming = targetSell !== null && currentRate >= targetSell;
+
       // Check each active phase for sell target
       const sellTargetPhases = active.filter(p => p.completed && currentRate >= p.sellRate);
 
@@ -2678,7 +2893,7 @@
           ${renderCurrencyTabs()}
 
           <!-- ===== RATE DISPLAY CARD (Moved from rate page) ===== -->
-          <div class="rate-card-glow rounded-2xl p-5 mb-4 ${isBuyTiming ? 'golden-flash' : ''}">
+          <div class="rate-card-glow rounded-2xl p-5 mb-4 ${isBuyTiming ? 'golden-flash' : isSellTiming ? 'green-flash' : ''}">
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-sm font-bold text-gray-700 flex items-center gap-2">
                 <i data-lucide="activity" class="w-4 h-4 text-indigo-500"></i>
@@ -2711,6 +2926,13 @@
                     </span>
                   </div>
                 ` : ''}
+                ${isSellTiming ? `
+                  <div class="my-3">
+                    <span class="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-extrabold shadow-lg green-flash-badge">
+                      💰 매도 타이밍! (목표: ${targetSell}원 이상)
+                    </span>
+                  </div>
+                ` : ''}
                 <div class="flex justify-center gap-2 mt-3">
                   <button onclick="startEditRate()" class="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm border border-gray-200">
                     <i data-lucide="edit-2" class="w-4 h-4"></i> 수동입력
@@ -2723,14 +2945,32 @@
             `}
           </div>
 
-          <!-- ===== TARGET BUY RATE INPUT ===== -->
+          <!-- ===== NOTIFICATION TOGGLE & TARGET RATES ===== -->
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+            <!-- Notification Toggle -->
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 ${state.notificationsEnabled ? 'bg-indigo-100' : 'bg-gray-100'} rounded-lg flex items-center justify-center">
+                  <span class="text-lg">${state.notificationsEnabled ? '🔔' : '🔕'}</span>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-gray-800">목표환율 알림</h3>
+                  <p class="text-[10px] text-gray-400">${state.notificationsEnabled ? '알림 활성화됨 · 목표 도달 시 푸시 알림' : '알림 비활성화됨'}</p>
+                </div>
+              </div>
+              <button onclick="${state.notificationsEnabled ? 'disableNotifications()' : 'requestNotificationPermission()'}" 
+                class="relative w-12 h-7 rounded-full transition-all duration-300 ${state.notificationsEnabled ? 'bg-indigo-500' : 'bg-gray-300'} flex items-center">
+                <span class="absolute w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300 ${state.notificationsEnabled ? 'translate-x-6' : 'translate-x-1'}"></span>
+              </button>
+            </div>
+
+            <!-- Target Buy Rate -->
             <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
               <i data-lucide="target" class="w-4 h-4 text-amber-500"></i>
-              목표 매수환율 설정
-              <span class="text-[10px] font-normal text-gray-400 ml-auto">실시간환율 ≤ 목표환율 → 매수 타이밍</span>
+              목표 매수환율
+              <span class="text-[10px] font-normal text-gray-400 ml-auto">환율 ≤ 목표 → 매수 알림</span>
             </h3>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 mb-3">
               <div class="flex-1 relative">
                 <input type="number" 
                   id="targetBuyInput"
@@ -2749,7 +2989,7 @@
               ` : ''}
             </div>
             ${targetBuy !== null ? `
-              <div class="mt-3 flex items-center justify-between px-2">
+              <div class="mb-4 flex items-center justify-between px-2">
                 <div class="flex items-center gap-2">
                   <span class="w-2 h-2 rounded-full ${isBuyTiming ? 'bg-amber-400 animate-pulse' : 'bg-gray-300'}"></span>
                   <span class="text-xs text-gray-500">현재: <strong class="${isBuyTiming ? 'text-amber-600' : 'text-gray-700'}">${currentRate.toFixed(ci.decimals)}원</strong></span>
@@ -2759,6 +2999,44 @@
                 </span>
               </div>
             ` : ''}
+
+            <!-- Target Sell Rate -->
+            <div class="border-t border-gray-100 pt-3">
+              <h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                <i data-lucide="trending-up" class="w-4 h-4 text-green-500"></i>
+                목표 매도환율
+                <span class="text-[10px] font-normal text-gray-400 ml-auto">환율 ≥ 목표 → 매도 알림</span>
+              </h3>
+              <div class="flex items-center gap-3">
+                <div class="flex-1 relative">
+                  <input type="number" 
+                    id="targetSellInput"
+                    value="${state[`targetSellRate_${cur}`]}" 
+                    onchange="setTargetSellRate('${cur}', this.value); render();"
+                    oninput="setTargetSellRate('${cur}', this.value);"
+                    class="w-full px-4 py-3 border-2 ${isSellTiming ? 'border-green-400 bg-green-50' : 'border-gray-200 bg-gray-50'} rounded-xl text-lg font-bold text-center focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-400 transition-all" 
+                    placeholder="목표 매도환율 입력" 
+                    step="${ci.step}" />
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-400">원${cur === 'JPY' ? '/100엔' : ''}</span>
+                </div>
+                ${state[`targetSellRate_${cur}`] !== '' ? `
+                  <button onclick="setTargetSellRate('${cur}', ''); render();" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors">
+                    <i data-lucide="x" class="w-4 h-4 text-gray-500"></i>
+                  </button>
+                ` : ''}
+              </div>
+              ${targetSell !== null ? `
+                <div class="mt-3 flex items-center justify-between px-2">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full ${isSellTiming ? 'bg-green-400 animate-pulse' : 'bg-gray-300'}"></span>
+                    <span class="text-xs text-gray-500">현재: <strong class="${isSellTiming ? 'text-green-600' : 'text-gray-700'}">${currentRate.toFixed(ci.decimals)}원</strong></span>
+                  </div>
+                  <span class="text-xs ${isSellTiming ? 'text-green-600 font-bold' : 'text-gray-500'}">
+                    ${isSellTiming ? '✅ 목표 도달! 매도하세요!' : `차이: ${(targetSell - currentRate).toFixed(ci.decimals)}원`}
+                  </span>
+                </div>
+              ` : ''}
+            </div>
           </div>
 
           <!-- Portfolio Summary -->
@@ -3925,6 +4203,10 @@
     // INITIALIZE
     // ==========================================
     loadFromStorage();
+    // Restore notification state based on browser permission
+    if (state.notificationsEnabled && 'Notification' in window && Notification.permission !== 'granted') {
+      state.notificationsEnabled = false;
+    }
     fetchRate();
     render();
     updateSideMenuProfile();
