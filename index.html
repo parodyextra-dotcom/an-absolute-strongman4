@@ -48,6 +48,105 @@
     /* Profit glow */
     .profit-glow { box-shadow: 0 0 20px rgba(34, 197, 94, 0.15), 0 4px 20px rgba(0,0,0,0.08); }
     .loss-glow { box-shadow: 0 0 20px rgba(239, 68, 68, 0.15), 0 4px 20px rgba(0,0,0,0.08); }
+
+    /* Grade-based Hero Card Styles */
+    .hero-grade-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1rem;
+      color: white;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      transition: background 0.6s ease, box-shadow 0.6s ease;
+    }
+    .hero-grade-loss {
+      background: linear-gradient(135deg, #475569, #64748b, #94a3b8);
+      box-shadow: 0 4px 24px rgba(71,85,105,0.25), 0 0 0 1px rgba(148,163,184,0.1);
+    }
+    .hero-grade-beginner {
+      background: linear-gradient(135deg, #6b7280, #9ca3af, #d1d5db);
+      box-shadow: 0 4px 24px rgba(107,114,128,0.25), 0 0 0 1px rgba(209,213,219,0.2);
+    }
+    .hero-grade-bronze {
+      background: linear-gradient(135deg, #92400e, #b45309, #d97706, #f59e0b);
+      box-shadow: 0 4px 24px rgba(180,83,9,0.3), 0 0 40px rgba(245,158,11,0.15);
+    }
+    .hero-grade-silver {
+      background: linear-gradient(135deg, #475569, #64748b, #94a3b8, #cbd5e1);
+      box-shadow: 0 4px 24px rgba(100,116,139,0.3), 0 0 40px rgba(203,213,225,0.15);
+    }
+    .hero-grade-gold {
+      background: linear-gradient(135deg, #78350f, #92400e, #b45309, #d97706);
+      box-shadow: 0 4px 24px rgba(146,64,14,0.35), 0 0 40px rgba(217,119,6,0.2);
+    }
+    @keyframes goldShimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    .hero-grade-gold::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.08) 50%, transparent 70%);
+      background-size: 200% 100%;
+      animation: goldShimmer 3s ease-in-out infinite;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .hero-grade-platinum {
+      background: linear-gradient(135deg, #0c4a6e, #0e7490, #06b6d4, #22d3ee);
+      box-shadow: 0 4px 24px rgba(14,116,144,0.35), 0 0 40px rgba(6,182,212,0.2), 0 0 80px rgba(34,211,238,0.1);
+    }
+    @keyframes platinumGlow {
+      0%, 100% { box-shadow: 0 4px 24px rgba(14,116,144,0.35), 0 0 40px rgba(6,182,212,0.2); }
+      50% { box-shadow: 0 4px 30px rgba(14,116,144,0.45), 0 0 60px rgba(6,182,212,0.3), 0 0 100px rgba(34,211,238,0.15); }
+    }
+    .hero-grade-platinum { animation: platinumGlow 3s ease-in-out infinite; }
+    .hero-grade-diamond {
+      background: linear-gradient(135deg, #4c1d95, #6d28d9, #8b5cf6, #a78bfa);
+      box-shadow: 0 4px 24px rgba(109,40,217,0.35), 0 0 40px rgba(139,92,246,0.2), 0 0 80px rgba(167,139,250,0.1);
+    }
+    @keyframes diamondSparkle {
+      0%, 100% { box-shadow: 0 4px 24px rgba(109,40,217,0.35), 0 0 40px rgba(139,92,246,0.2); }
+      33% { box-shadow: 0 4px 30px rgba(109,40,217,0.5), 0 0 60px rgba(139,92,246,0.35), 0 0 100px rgba(167,139,250,0.2); }
+      66% { box-shadow: 0 4px 24px rgba(109,40,217,0.4), 0 0 50px rgba(139,92,246,0.25), 0 0 80px rgba(167,139,250,0.12); }
+    }
+    .hero-grade-diamond { animation: diamondSparkle 2.5s ease-in-out infinite; }
+    .hero-grade-diamond::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, transparent 20%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.1) 55%, transparent 80%);
+      background-size: 250% 100%;
+      animation: goldShimmer 2.5s ease-in-out infinite;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .hero-grade-absolute {
+      background: linear-gradient(135deg, #7f1d1d, #9f1239, #e11d48, #f43f5e, #fb7185);
+      box-shadow: 0 4px 24px rgba(159,18,57,0.4), 0 0 40px rgba(225,29,72,0.25), 0 0 80px rgba(244,63,94,0.15);
+    }
+    @keyframes absoluteAura {
+      0%, 100% { box-shadow: 0 4px 24px rgba(159,18,57,0.4), 0 0 40px rgba(225,29,72,0.25); }
+      25% { box-shadow: 0 4px 32px rgba(159,18,57,0.5), 0 0 60px rgba(225,29,72,0.35), 0 0 100px rgba(244,63,94,0.2); }
+      50% { box-shadow: 0 4px 24px rgba(159,18,57,0.45), 0 0 50px rgba(225,29,72,0.3), 0 0 120px rgba(244,63,94,0.18); }
+      75% { box-shadow: 0 4px 28px rgba(159,18,57,0.55), 0 0 70px rgba(225,29,72,0.4), 0 0 100px rgba(244,63,94,0.25); }
+    }
+    .hero-grade-absolute { animation: absoluteAura 2s ease-in-out infinite; }
+    .hero-grade-absolute::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(120deg, transparent 10%, rgba(255,215,0,0.08) 30%, rgba(255,255,255,0.12) 50%, rgba(255,215,0,0.08) 70%, transparent 90%);
+      background-size: 300% 100%;
+      animation: goldShimmer 2s ease-in-out infinite;
+      z-index: 1;
+      pointer-events: none;
+    }
+    /* Hero card decorative circles */
+    .hero-deco-1 { position:absolute; top:0; right:0; width:8rem; height:8rem; background:rgba(255,255,255,0.1); border-radius:50%; transform:translate(2rem,-2rem); }
+    .hero-deco-2 { position:absolute; bottom:0; left:0; width:6rem; height:6rem; background:rgba(255,255,255,0.05); border-radius:50%; transform:translate(-1.5rem,1.5rem); }
+    .hero-deco-3 { position:absolute; top:50%; right:1rem; width:4rem; height:4rem; background:rgba(255,255,255,0.05); border-radius:50%; }
     
     /* Pulse ring for target reached */
     @keyframes pulseRing {
@@ -184,7 +283,7 @@
       pointer-events: none;
     }
     .side-menu-overlay.active {
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.3);
       pointer-events: auto;
     }
     .side-menu {
@@ -196,10 +295,9 @@
       max-width: 80vw;
       z-index: 9999;
       transform: translateX(-100%);
-      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      background: linear-gradient(180deg, #6b5a00 0%, #8b7a1a 40%, #a08c2a 100%);
       transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease;
-      box-shadow: 4px 0 30px rgba(0,0,0,0.3);
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+      box-shadow: 4px 0 30px rgba(0,0,0,0.08);
       display: flex;
       flex-direction: column;
       overflow-y: auto;
@@ -212,7 +310,7 @@
       align-items: center;
       gap: 14px;
       padding: 14px 24px;
-      color: rgba(255,255,255,0.75);
+      color: #475569;
       font-size: 15px;
       font-weight: 500;
       cursor: pointer;
@@ -221,13 +319,13 @@
       position: relative;
     }
     .side-menu-item:hover {
-      background: rgba(255,255,255,0.08);
-      color: #fff;
+      background: rgba(100,116,139,0.06);
+      color: #334155;
     }
     .side-menu-item.active {
-      background: rgba(255,255,255,0.12);
-      color: #fff;
-      border-left-color: rgba(255,255,255,0.7);
+      background: rgba(100,116,139,0.1);
+      color: #1e293b;
+      border-left-color: #94a3b8;
       font-weight: 600;
     }
     .side-menu-item .menu-icon {
@@ -240,14 +338,14 @@
     }
     .side-menu-divider {
       height: 1px;
-      background: rgba(255,255,255,0.1);
+      background: rgba(100,116,139,0.12);
       margin: 8px 20px;
     }
     .side-menu-section-title {
       padding: 16px 24px 8px;
       font-size: 11px;
       font-weight: 700;
-      color: rgba(255,255,255,0.35);
+      color: #94a3b8;
       text-transform: uppercase;
       letter-spacing: 1.5px;
     }
@@ -292,19 +390,18 @@
 
   <!-- Side Menu -->
   <div id="sideMenu" class="side-menu">
-    <!-- Profile Area -->
-    <div class="p-6 pb-4">
+    <!-- Profile Area (별명칸 - 별도 배경) -->
+    <div id="sideProfileArea" class="p-6 pb-4" style="background: linear-gradient(135deg, #f1f5f9, #e2e8f0); border-bottom: 1px solid rgba(100,116,139,0.1);">
       <div class="flex items-center gap-3 mb-1">
-        <div class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg" id="sideProfileAvatar" style="background: linear-gradient(135deg, #ca8a04, #facc15);">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg" id="sideProfileAvatar" style="background: linear-gradient(135deg, #94a3b8, #cbd5e1);">
           <i data-lucide="user" class="w-6 h-6 text-white"></i>
         </div>
         <div>
-          <h2 class="text-white font-extrabold text-lg leading-tight" id="sideProfileName">게스트</h2>
-          <p class="text-white/70 text-xs font-medium" id="sideProfileAge">프로필을 설정하세요</p>
+          <h2 class="font-extrabold text-lg leading-tight" id="sideProfileName" style="color: #334155;">게스트</h2>
+          <p class="text-xs font-medium" id="sideProfileAge" style="color: #94a3b8;">프로필을 설정하세요</p>
         </div>
       </div>
     </div>
-    <div class="side-menu-divider" style="margin-top:0;"></div>
 
     <!-- Menu Items -->
     <div class="side-menu-section-title">계정</div>
@@ -322,8 +419,8 @@
     <div class="side-menu-item" onclick="toggleAdFree()">
       <div class="menu-icon"><i data-lucide="shield-off" class="w-[18px] h-[18px]"></i></div>
       <span>광고 끄기</span>
-      <div id="adFreeToggle" class="ml-auto w-10 h-5 rounded-full bg-white/20 relative transition-all cursor-pointer" style="flex-shrink:0;">
-        <div class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-all" id="adFreeToggleCircle"></div>
+      <div id="adFreeToggle" class="ml-auto w-10 h-5 rounded-full bg-slate-200 relative transition-all cursor-pointer" style="flex-shrink:0;">
+        <div class="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all" id="adFreeToggleCircle"></div>
       </div>
     </div>
     <div class="side-menu-item" onclick="openAppRating()">
@@ -353,7 +450,7 @@
     <!-- Bottom Info -->
     <div class="mt-auto p-5">
       <div class="side-menu-divider" style="margin:0 0 12px 0;"></div>
-      <div class="flex items-center gap-2 text-white/50 text-[11px]">
+      <div id="sideMenuBottomInfo" class="flex items-center gap-2 text-[11px]" style="color: #94a3b8;">
         <i data-lucide="info" class="w-3 h-3"></i>
         <span>v2.0 · 절대강자 분할환전</span>
       </div>
@@ -655,76 +752,76 @@
         <p class="text-xs text-gray-500 mb-4">올해 실현된 매도 수익률을 기준으로 등급이 결정됩니다.</p>
         
         <div class="space-y-2.5">
-          <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-            <span class="text-2xl">🌱</span>
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-slate-50 to-gray-50 border border-slate-100">
+            <span class="text-2xl">◽</span>
             <div class="flex-1">
-              <p class="text-sm font-bold text-gray-700">초보</p>
+              <p class="text-sm font-bold text-slate-500">초보</p>
               <p class="text-[11px] text-gray-500">아직 매도 기록이 없습니다. 첫 거래를 시작해보세요!</p>
             </div>
-            <span class="text-[10px] font-semibold text-gray-400 whitespace-nowrap">매도 0건</span>
+            <span class="text-[10px] font-semibold text-slate-400 whitespace-nowrap">매도 0건</span>
           </div>
 
-          <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 border border-gray-200">
-            <span class="text-2xl">😢</span>
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-slate-50 to-gray-100 border border-slate-200">
+            <span class="text-2xl">▽</span>
             <div class="flex-1">
-              <p class="text-sm font-bold text-gray-700">손실</p>
+              <p class="text-sm font-bold text-slate-600">손실</p>
               <p class="text-[11px] text-gray-500">수익률이 마이너스입니다. 환율 변동을 잘 살펴보세요.</p>
             </div>
-            <span class="text-[10px] font-semibold text-red-400 whitespace-nowrap">수익률 &lt; 0%</span>
+            <span class="text-[10px] font-semibold text-slate-400 whitespace-nowrap">수익률 &lt; 0%</span>
           </div>
 
-          <div class="flex items-center gap-3 p-3 rounded-xl bg-blue-50 border border-blue-100">
-            <span class="text-2xl">💧</span>
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100">
+            <span class="text-2xl">🥉</span>
             <div class="flex-1">
-              <p class="text-sm font-bold text-blue-700">하수</p>
+              <p class="text-sm font-bold text-amber-700">브론즈</p>
               <p class="text-[11px] text-gray-500">소규모 수익을 달성했습니다. 꾸준히 경험을 쌓아보세요.</p>
             </div>
-            <span class="text-[10px] font-semibold text-blue-400 whitespace-nowrap">0% ~ 10%</span>
+            <span class="text-[10px] font-semibold text-amber-400 whitespace-nowrap">0% ~ 10%</span>
           </div>
 
-          <div class="flex items-center gap-3 p-3 rounded-xl bg-green-50 border border-green-100">
-            <span class="text-2xl">🌿</span>
-            <div class="flex-1">
-              <p class="text-sm font-bold text-green-700">중수</p>
-              <p class="text-[11px] text-gray-500">안정적인 수익률! 환전 타이밍을 잘 잡고 있습니다.</p>
-            </div>
-            <span class="text-[10px] font-semibold text-green-400 whitespace-nowrap">10% ~ 20%</span>
-          </div>
-
-          <div class="flex items-center gap-3 p-3 rounded-xl bg-purple-50 border border-purple-100">
-            <span class="text-2xl">🔮</span>
-            <div class="flex-1">
-              <p class="text-sm font-bold text-purple-700">고수</p>
-              <p class="text-[11px] text-gray-500">뛰어난 수익률을 기록 중! 환율 분석 능력이 탁월합니다.</p>
-            </div>
-            <span class="text-[10px] font-semibold text-purple-400 whitespace-nowrap">20% ~ 30%</span>
-          </div>
-
-          <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-100 border border-slate-200">
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200">
             <span class="text-2xl">🥈</span>
             <div class="flex-1">
-              <p class="text-sm font-bold text-slate-700">실버</p>
+              <p class="text-sm font-bold text-slate-600">실버</p>
+              <p class="text-[11px] text-gray-500">안정적인 수익률! 환전 타이밍을 잘 잡고 있습니다.</p>
+            </div>
+            <span class="text-[10px] font-semibold text-slate-400 whitespace-nowrap">10% ~ 20%</span>
+          </div>
+
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200">
+            <span class="text-2xl">🏅</span>
+            <div class="flex-1">
+              <p class="text-sm font-bold text-amber-600">골드</p>
+              <p class="text-[11px] text-gray-500">뛰어난 수익률을 기록 중! 환율 분석 능력이 탁월합니다.</p>
+            </div>
+            <span class="text-[10px] font-semibold text-amber-400 whitespace-nowrap">20% ~ 30%</span>
+          </div>
+
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-cyan-50 to-sky-50 border border-cyan-200">
+            <span class="text-2xl">💎</span>
+            <div class="flex-1">
+              <p class="text-sm font-bold text-cyan-700">플래티넘</p>
               <p class="text-[11px] text-gray-500">상위권 투자자! 높은 수익률로 실력을 증명했습니다.</p>
             </div>
-            <span class="text-[10px] font-semibold text-slate-500 whitespace-nowrap">30% ~ 50%</span>
+            <span class="text-[10px] font-semibold text-cyan-500 whitespace-nowrap">30% ~ 50%</span>
           </div>
 
-          <div class="flex items-center gap-3 p-3 rounded-xl bg-yellow-50 border border-yellow-200">
-            <span class="text-2xl">🥇</span>
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200">
+            <span class="text-2xl">♛</span>
             <div class="flex-1">
-              <p class="text-sm font-bold text-yellow-700">골드</p>
+              <p class="text-sm font-bold text-violet-700">다이아몬드</p>
               <p class="text-[11px] text-gray-500">최상위 투자자! 놀라운 수익률을 달성했습니다.</p>
             </div>
-            <span class="text-[10px] font-semibold text-yellow-500 whitespace-nowrap">50% ~ 60%</span>
+            <span class="text-[10px] font-semibold text-violet-500 whitespace-nowrap">50% ~ 60%</span>
           </div>
 
-          <div class="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-yellow-100 to-red-100 border border-red-200">
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-amber-50 via-rose-50 to-violet-50 border border-rose-200">
             <span class="text-2xl">👑</span>
             <div class="flex-1">
-              <p class="text-sm font-bold text-red-700">투자의 신</p>
+              <p class="text-sm font-bold text-rose-600">절대강자</p>
               <p class="text-[11px] text-gray-500">전설적인 수익률! 환전 투자의 절대강자입니다!</p>
             </div>
-            <span class="text-[10px] font-semibold text-red-500 whitespace-nowrap">60% 이상</span>
+            <span class="text-[10px] font-semibold text-rose-500 whitespace-nowrap">60% 이상</span>
           </div>
         </div>
 
@@ -1052,15 +1149,15 @@
       }, 0);
       const rate = totalInv > 0 ? (totalProf / totalInv) * 100 : 0;
 
-      let gradeInfo = { grade: '초보', color: 'text-gray-600', bg: 'bg-gray-100', emoji: '🌱', headerGradient: 'linear-gradient(to right, #6b7280, #9ca3af, #6b7280)', sideMenuGradient: 'linear-gradient(180deg, #4b5563 0%, #6b7280 40%, #9ca3af 100%)', gradeIcon: 'sprout', avatarGradient: 'linear-gradient(135deg, #6b7280, #9ca3af)' };
+      let gradeInfo = { grade: '초보', color: 'text-slate-500', bg: 'bg-gradient-to-br from-slate-50 to-gray-100', emoji: '◽', heroClass: 'hero-grade-beginner', headerGradient: 'linear-gradient(135deg, #94a3b8, #cbd5e1)', sideMenuGradient: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)', sideMenuTextColor: '#475569', sideMenuSubTextColor: '#94a3b8', sideMenuDividerColor: 'rgba(100,116,139,0.12)', sideMenuItemColor: '#64748b', sideMenuItemHoverBg: 'rgba(100,116,139,0.06)', sideMenuItemActiveBg: 'rgba(100,116,139,0.1)', sideMenuItemActiveBorder: '#94a3b8', sideMenuProfileBg: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)', sideMenuProfileNameColor: '#334155', gradeIcon: 'sprout', avatarGradient: 'linear-gradient(135deg, #94a3b8, #cbd5e1)' };
       if (allSold.length > 0) {
-        if (rate < 0) gradeInfo = { grade: '손실', color: 'text-gray-700', bg: 'bg-gray-200', emoji: '😢', headerGradient: 'linear-gradient(to right, #374151, #4b5563, #374151)', sideMenuGradient: 'linear-gradient(180deg, #1f2937 0%, #374151 40%, #4b5563 100%)', gradeIcon: 'trending-down', avatarGradient: 'linear-gradient(135deg, #374151, #6b7280)' };
-        else if (rate < 10) gradeInfo = { grade: '하수', color: 'text-blue-700', bg: 'bg-blue-100', emoji: '💧', headerGradient: 'linear-gradient(to right, #2563eb, #3b82f6, #2563eb)', sideMenuGradient: 'linear-gradient(180deg, #1d4ed8 0%, #2563eb 40%, #3b82f6 100%)', gradeIcon: 'droplets', avatarGradient: 'linear-gradient(135deg, #2563eb, #60a5fa)' };
-        else if (rate < 20) gradeInfo = { grade: '중수', color: 'text-green-700', bg: 'bg-green-100', emoji: '🌿', headerGradient: 'linear-gradient(to right, #16a34a, #22c55e, #16a34a)', sideMenuGradient: 'linear-gradient(180deg, #15803d 0%, #16a34a 40%, #22c55e 100%)', gradeIcon: 'leaf', avatarGradient: 'linear-gradient(135deg, #16a34a, #4ade80)' };
-        else if (rate < 30) gradeInfo = { grade: '고수', color: 'text-purple-700', bg: 'bg-purple-100', emoji: '🔮', headerGradient: 'linear-gradient(to right, #7c3aed, #8b5cf6, #7c3aed)', sideMenuGradient: 'linear-gradient(180deg, #6d28d9 0%, #7c3aed 40%, #8b5cf6 100%)', gradeIcon: 'gem', avatarGradient: 'linear-gradient(135deg, #7c3aed, #a78bfa)' };
-        else if (rate < 50) gradeInfo = { grade: '실버', color: 'text-slate-700', bg: 'bg-slate-200', emoji: '🥈', headerGradient: 'linear-gradient(to right, #64748b, #94a3b8, #64748b)', sideMenuGradient: 'linear-gradient(180deg, #475569 0%, #64748b 40%, #94a3b8 100%)', gradeIcon: 'award', avatarGradient: 'linear-gradient(135deg, #64748b, #cbd5e1)' };
-        else if (rate < 60) gradeInfo = { grade: '골드', color: 'text-yellow-700', bg: 'bg-yellow-100', emoji: '🥇', headerGradient: 'linear-gradient(to right, #c9a830, #d4b440, #c9a830)', sideMenuGradient: 'linear-gradient(180deg, #6b5a00 0%, #8b7a1a 40%, #a08c2a 100%)', gradeIcon: 'trophy', avatarGradient: 'linear-gradient(135deg, #ca8a04, #facc15)' };
-        else gradeInfo = { grade: '투자의 신', color: 'text-red-700', bg: 'bg-gradient-to-r from-yellow-200 to-red-200', emoji: '👑', headerGradient: 'linear-gradient(to right, #dc2626, #f59e0b, #dc2626)', sideMenuGradient: 'linear-gradient(180deg, #991b1b 0%, #dc2626 30%, #b45309 70%, #d97706 100%)', gradeIcon: 'crown', avatarGradient: 'linear-gradient(135deg, #dc2626, #f59e0b)' };
+        if (rate < 0) gradeInfo = { grade: '손실', color: 'text-slate-600', bg: 'bg-gradient-to-br from-slate-100 to-gray-150', emoji: '▽', heroClass: 'hero-grade-loss', headerGradient: 'linear-gradient(135deg, #64748b, #94a3b8)', sideMenuGradient: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)', sideMenuTextColor: '#475569', sideMenuSubTextColor: '#94a3b8', sideMenuDividerColor: 'rgba(100,116,139,0.12)', sideMenuItemColor: '#64748b', sideMenuItemHoverBg: 'rgba(100,116,139,0.06)', sideMenuItemActiveBg: 'rgba(100,116,139,0.1)', sideMenuItemActiveBorder: '#94a3b8', sideMenuProfileBg: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)', sideMenuProfileNameColor: '#334155', gradeIcon: 'trending-down', avatarGradient: 'linear-gradient(135deg, #64748b, #94a3b8)' };
+        else if (rate < 10) gradeInfo = { grade: '브론즈', color: 'text-amber-700', bg: 'bg-gradient-to-br from-amber-50 to-orange-50', emoji: '🥉', heroClass: 'hero-grade-bronze', headerGradient: 'linear-gradient(135deg, #d97706, #f59e0b)', sideMenuGradient: 'linear-gradient(180deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%)', sideMenuTextColor: '#92400e', sideMenuSubTextColor: '#b45309', sideMenuDividerColor: 'rgba(217,119,6,0.12)', sideMenuItemColor: '#92400e', sideMenuItemHoverBg: 'rgba(245,158,11,0.06)', sideMenuItemActiveBg: 'rgba(245,158,11,0.1)', sideMenuItemActiveBorder: '#f59e0b', sideMenuProfileBg: 'linear-gradient(135deg, #fef3c7, #fde68a)', sideMenuProfileNameColor: '#78350f', gradeIcon: 'droplets', avatarGradient: 'linear-gradient(135deg, #d97706, #f59e0b)' };
+        else if (rate < 20) gradeInfo = { grade: '실버', color: 'text-slate-600', bg: 'bg-gradient-to-br from-slate-50 to-blue-50', emoji: '🥈', heroClass: 'hero-grade-silver', headerGradient: 'linear-gradient(135deg, #64748b, #94a3b8, #cbd5e1)', sideMenuGradient: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)', sideMenuTextColor: '#334155', sideMenuSubTextColor: '#64748b', sideMenuDividerColor: 'rgba(100,116,139,0.15)', sideMenuItemColor: '#475569', sideMenuItemHoverBg: 'rgba(100,116,139,0.06)', sideMenuItemActiveBg: 'rgba(100,116,139,0.1)', sideMenuItemActiveBorder: '#94a3b8', sideMenuProfileBg: 'linear-gradient(135deg, #e2e8f0, #cbd5e1)', sideMenuProfileNameColor: '#1e293b', gradeIcon: 'award', avatarGradient: 'linear-gradient(135deg, #64748b, #94a3b8)' };
+        else if (rate < 30) gradeInfo = { grade: '골드', color: 'text-amber-600', bg: 'bg-gradient-to-br from-amber-50 to-yellow-50', emoji: '🏅', heroClass: 'hero-grade-gold', headerGradient: 'linear-gradient(135deg, #b45309, #d97706, #f59e0b)', sideMenuGradient: 'linear-gradient(180deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%)', sideMenuTextColor: '#78350f', sideMenuSubTextColor: '#92400e', sideMenuDividerColor: 'rgba(180,83,9,0.12)', sideMenuItemColor: '#92400e', sideMenuItemHoverBg: 'rgba(245,158,11,0.06)', sideMenuItemActiveBg: 'rgba(245,158,11,0.1)', sideMenuItemActiveBorder: '#f59e0b', sideMenuProfileBg: 'linear-gradient(135deg, #fde68a, #fbbf24)', sideMenuProfileNameColor: '#78350f', gradeIcon: 'trophy', avatarGradient: 'linear-gradient(135deg, #b45309, #f59e0b)' };
+        else if (rate < 50) gradeInfo = { grade: '플래티넘', color: 'text-cyan-700', bg: 'bg-gradient-to-br from-cyan-50 to-sky-50', emoji: '💎', heroClass: 'hero-grade-platinum', headerGradient: 'linear-gradient(135deg, #0e7490, #06b6d4, #67e8f9)', sideMenuGradient: 'linear-gradient(180deg, #ecfeff 0%, #cffafe 50%, #a5f3fc 100%)', sideMenuTextColor: '#155e75', sideMenuSubTextColor: '#0e7490', sideMenuDividerColor: 'rgba(6,182,212,0.12)', sideMenuItemColor: '#155e75', sideMenuItemHoverBg: 'rgba(6,182,212,0.06)', sideMenuItemActiveBg: 'rgba(6,182,212,0.1)', sideMenuItemActiveBorder: '#06b6d4', sideMenuProfileBg: 'linear-gradient(135deg, #a5f3fc, #67e8f9)', sideMenuProfileNameColor: '#083344', gradeIcon: 'gem', avatarGradient: 'linear-gradient(135deg, #0891b2, #22d3ee)' };
+        else if (rate < 60) gradeInfo = { grade: '다이아몬드', color: 'text-violet-700', bg: 'bg-gradient-to-br from-violet-50 to-purple-50', emoji: '♛', heroClass: 'hero-grade-diamond', headerGradient: 'linear-gradient(135deg, #6d28d9, #8b5cf6, #a78bfa)', sideMenuGradient: 'linear-gradient(180deg, #f5f3ff 0%, #ede9fe 50%, #ddd6fe 100%)', sideMenuTextColor: '#4c1d95', sideMenuSubTextColor: '#6d28d9', sideMenuDividerColor: 'rgba(139,92,246,0.12)', sideMenuItemColor: '#5b21b6', sideMenuItemHoverBg: 'rgba(139,92,246,0.06)', sideMenuItemActiveBg: 'rgba(139,92,246,0.1)', sideMenuItemActiveBorder: '#8b5cf6', sideMenuProfileBg: 'linear-gradient(135deg, #ddd6fe, #c4b5fd)', sideMenuProfileNameColor: '#3b0764', gradeIcon: 'gem', avatarGradient: 'linear-gradient(135deg, #7c3aed, #a78bfa)' };
+        else gradeInfo = { grade: '절대강자', color: 'text-rose-600', bg: 'bg-gradient-to-br from-amber-50 via-rose-50 to-violet-50', emoji: '👑', heroClass: 'hero-grade-absolute', headerGradient: 'linear-gradient(135deg, #9f1239, #e11d48, #f43f5e)', sideMenuGradient: 'linear-gradient(180deg, #fff1f2 0%, #ffe4e6 40%, #fecdd3 100%)', sideMenuTextColor: '#9f1239', sideMenuSubTextColor: '#be123c', sideMenuDividerColor: 'rgba(225,29,72,0.1)', sideMenuItemColor: '#9f1239', sideMenuItemHoverBg: 'rgba(244,63,94,0.06)', sideMenuItemActiveBg: 'rgba(244,63,94,0.1)', sideMenuItemActiveBorder: '#f43f5e', sideMenuProfileBg: 'linear-gradient(135deg, #fecdd3, #fda4af)', sideMenuProfileNameColor: '#881337', gradeIcon: 'crown', avatarGradient: 'linear-gradient(135deg, #e11d48, #f43f5e)' };
       }
       return { ...gradeInfo, totalProfit: totalProf, totalInvested: totalInv, returnRate: rate };
     }
@@ -1486,17 +1583,44 @@
         topBar.style.background = grade.headerGradient;
       }
       
-      // 사이드메뉴 색상 변경
+      // 사이드메뉴 색상 변경 (밝은 톤)
       const sideMenu = document.getElementById('sideMenu');
       if (sideMenu) {
         sideMenu.style.background = grade.sideMenuGradient;
+        sideMenu.style.boxShadow = '4px 0 30px rgba(0,0,0,0.08)';
       }
+      
+      // 사이드메뉴 텍스트 색상 동적 적용
+      document.querySelectorAll('.side-menu-item').forEach(item => {
+        item.style.color = grade.sideMenuItemColor || '#475569';
+      });
+      document.querySelectorAll('.side-menu-divider').forEach(div => {
+        div.style.background = grade.sideMenuDividerColor || 'rgba(100,116,139,0.12)';
+      });
+      document.querySelectorAll('.side-menu-section-title').forEach(title => {
+        title.style.color = grade.sideMenuSubTextColor || '#94a3b8';
+      });
+      
+      // 프로필 이름/서브텍스트 색상
+      const sideProfileName = document.getElementById('sideProfileName');
+      if (sideProfileName) sideProfileName.style.color = grade.sideMenuProfileNameColor || '#334155';
+      const sideProfileAge = document.getElementById('sideProfileAge');
+      if (sideProfileAge) sideProfileAge.style.color = grade.sideMenuSubTextColor || '#94a3b8';
+      
+      // 프로필 영역 배경 (별명칸) - 하단 메뉴와 구분
+      const profileArea = document.getElementById('sideProfileArea');
+      if (profileArea) {
+        profileArea.style.background = grade.sideMenuProfileBg || 'linear-gradient(135deg, #f1f5f9, #e2e8f0)';
+      }
+      
+      // 하단 정보 영역
+      const bottomInfo = document.getElementById('sideMenuBottomInfo');
+      if (bottomInfo) bottomInfo.style.color = grade.sideMenuSubTextColor || '#94a3b8';
       
       // 사이드메뉴 프로필 아바타 아이콘 변경
       const avatar = document.getElementById('sideProfileAvatar');
       if (avatar) {
         avatar.style.background = grade.avatarGradient;
-        // lucide 아이콘 이름으로 교체
         const iconMap = {
           'sprout': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>',
           'trending-down': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',
@@ -1828,10 +1952,10 @@
       return `
         <div class="p-4 page-enter">
           <!-- Total Profit Hero Card -->
-          <div class="relative overflow-hidden rounded-2xl ${totalAll >= 0 ? 'bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 profit-glow' : 'bg-gradient-to-br from-red-500 via-rose-500 to-pink-600 loss-glow'} text-white p-5 mb-4">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-8 translate-x-8"></div>
-            <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-6 -translate-x-6"></div>
-            <div class="absolute top-1/2 right-4 w-16 h-16 bg-white/5 rounded-full"></div>
+          <div class="hero-grade-card ${grade.heroClass}">
+            <div class="hero-deco-1"></div>
+            <div class="hero-deco-2"></div>
+            <div class="hero-deco-3"></div>
             <div class="relative z-10">
               <div class="flex items-center justify-between mb-3 cursor-pointer" onclick="openGradeInfoModal()">
                 <div class="flex items-center gap-2">
