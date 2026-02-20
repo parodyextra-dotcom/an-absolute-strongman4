@@ -26,11 +26,24 @@
     .scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
     
     /* Bottom nav safe area */
-    .bottom-nav { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+    .bottom-nav { padding-bottom: max(2px, env(safe-area-inset-bottom)); }
+
+    /* Swipe transition */
+    .swipe-container {
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
+    }
+    .swipe-container.swiping {
+      transition: none;
+    }
     
     /* Smooth page transitions */
     .page-enter { animation: fadeIn 0.25s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .page-slide-left { animation: slideFromRight 0.25s ease-out; }
+    @keyframes slideFromRight { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
+    .page-slide-right { animation: slideFromLeft 0.25s ease-out; }
+    @keyframes slideFromLeft { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: translateX(0); } }
     
     /* Profit glow */
     .profit-glow { box-shadow: 0 0 20px rgba(34, 197, 94, 0.15), 0 4px 20px rgba(0,0,0,0.08); }
@@ -115,7 +128,7 @@
 
     /* Gradient text */
     .gradient-text {
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      background: linear-gradient(135deg, #b8960c, #d4a917);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -143,7 +156,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 12px 16px;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      background: linear-gradient(135deg, #b8960c, #d4a917);
       color: white;
       flex-shrink: 0;
     }
@@ -184,7 +197,8 @@
       z-index: 9999;
       transform: translateX(-100%);
       transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      background: linear-gradient(180deg, #1e1b4b 0%, #312e81 40%, #3730a3 100%);
+      background: linear-gradient(180deg, #6b5a00 0%, #8b7a1a 40%, #a08c2a 100%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease;
       box-shadow: 4px 0 30px rgba(0,0,0,0.3);
       display: flex;
       flex-direction: column;
@@ -213,7 +227,7 @@
     .side-menu-item.active {
       background: rgba(255,255,255,0.12);
       color: #fff;
-      border-left-color: #a5b4fc;
+      border-left-color: rgba(255,255,255,0.7);
       font-weight: 600;
     }
     .side-menu-item .menu-icon {
@@ -281,12 +295,12 @@
     <!-- Profile Area -->
     <div class="p-6 pb-4">
       <div class="flex items-center gap-3 mb-1">
-        <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-full flex items-center justify-center shadow-lg" id="sideProfileAvatar">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg" id="sideProfileAvatar" style="background: linear-gradient(135deg, #ca8a04, #facc15);">
           <i data-lucide="user" class="w-6 h-6 text-white"></i>
         </div>
         <div>
           <h2 class="text-white font-extrabold text-lg leading-tight" id="sideProfileName">게스트</h2>
-          <p class="text-indigo-300 text-xs font-medium" id="sideProfileAge">프로필을 설정하세요</p>
+          <p class="text-white/70 text-xs font-medium" id="sideProfileAge">프로필을 설정하세요</p>
         </div>
       </div>
     </div>
@@ -339,7 +353,7 @@
     <!-- Bottom Info -->
     <div class="mt-auto p-5">
       <div class="side-menu-divider" style="margin:0 0 12px 0;"></div>
-      <div class="flex items-center gap-2 text-indigo-400 text-[11px]">
+      <div class="flex items-center gap-2 text-white/50 text-[11px]">
         <i data-lucide="info" class="w-3 h-3"></i>
         <span>v2.0 · 절대강자 분할환전</span>
       </div>
@@ -350,12 +364,12 @@
   <div id="profileModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeProfileModal()" style="z-index:0;"></div>
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="z-index:1;">
-      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-center">
+      <div class="bg-gradient-to-r from-amber-500 to-yellow-600 p-6 text-center">
         <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
           <i data-lucide="user" class="w-10 h-10 text-white"></i>
         </div>
         <h3 class="text-white font-bold text-lg">내 프로필</h3>
-        <p class="text-indigo-200 text-xs mt-1">프로필 정보를 설정하세요</p>
+        <p class="text-yellow-100 text-xs mt-1">프로필 정보를 설정하세요</p>
       </div>
       <div class="p-6 space-y-4">
         <!-- Nickname -->
@@ -391,7 +405,7 @@
       </div>
       <div class="px-6 pb-6 flex gap-3">
         <button type="button" onclick="event.stopPropagation(); closeProfileModal();" class="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all">취소</button>
-        <button type="button" onclick="event.stopPropagation(); saveProfile();" class="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all shadow-lg">저장</button>
+        <button type="button" onclick="event.stopPropagation(); saveProfile();" class="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-amber-500 to-yellow-600 hover:opacity-90 transition-all shadow-lg">저장</button>
       </div>
     </div>
   </div>
@@ -400,7 +414,7 @@
   <div id="settingsModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeSettingsModal()" style="z-index:0;"></div>
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="z-index:1;">
-      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 flex items-center justify-between">
+      <div class="bg-gradient-to-r from-amber-500 to-yellow-600 p-5 flex items-center justify-between">
         <h3 class="text-white font-bold text-lg flex items-center gap-2">
           <i data-lucide="settings" class="w-5 h-5"></i> 설정
         </h3>
@@ -454,7 +468,7 @@
   <div id="usageGuideModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeUsageGuide()" style="z-index:0;"></div>
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="max-height:85vh; z-index:1;">
-      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 flex items-center justify-between">
+      <div class="bg-gradient-to-r from-amber-500 to-yellow-600 p-5 flex items-center justify-between">
         <h3 class="text-white font-bold text-lg flex items-center gap-2">
           <i data-lucide="book-open" class="w-5 h-5"></i> 사용방법
         </h3>
@@ -488,7 +502,7 @@
         </div>
       </div>
       <div class="px-5 pb-5 pt-3">
-        <button type="button" onclick="event.stopPropagation(); closeUsageGuide();" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all">확인</button>
+        <button type="button" onclick="event.stopPropagation(); closeUsageGuide();" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-amber-500 to-yellow-600 hover:opacity-90 transition-all">확인</button>
       </div>
     </div>
   </div>
@@ -497,7 +511,7 @@
   <div id="privacyPolicyModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePrivacyPolicy()" style="z-index:0;"></div>
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="max-height:85vh; z-index:1;">
-      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 flex items-center justify-between">
+      <div class="bg-gradient-to-r from-amber-500 to-yellow-600 p-5 flex items-center justify-between">
         <h3 class="text-white font-bold text-lg flex items-center gap-2">
           <i data-lucide="shield" class="w-5 h-5"></i> 개인정보처리방침
         </h3>
@@ -528,7 +542,7 @@
         </div>
       </div>
       <div class="px-5 pb-5 pt-3">
-        <button type="button" onclick="event.stopPropagation(); closePrivacyPolicy();" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all">확인</button>
+        <button type="button" onclick="event.stopPropagation(); closePrivacyPolicy();" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-amber-500 to-yellow-600 hover:opacity-90 transition-all">확인</button>
       </div>
     </div>
   </div>
@@ -537,7 +551,7 @@
   <div id="termsModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeTermsOfService()" style="z-index:0;"></div>
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="max-height:85vh; z-index:1;">
-      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 flex items-center justify-between">
+      <div class="bg-gradient-to-r from-amber-500 to-yellow-600 p-5 flex items-center justify-between">
         <h3 class="text-white font-bold text-lg flex items-center gap-2">
           <i data-lucide="file-text" class="w-5 h-5"></i> 이용약관
         </h3>
@@ -572,13 +586,13 @@
         </div>
       </div>
       <div class="px-5 pb-5 pt-3">
-        <button type="button" onclick="event.stopPropagation(); closeTermsOfService();" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all">확인</button>
+        <button type="button" onclick="event.stopPropagation(); closeTermsOfService();" class="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-amber-500 to-yellow-600 hover:opacity-90 transition-all">확인</button>
       </div>
     </div>
   </div>
 
   <!-- Top Header Bar -->
-  <header id="topBar" class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white shadow-lg">
+  <header id="topBar" class="fixed top-0 left-0 right-0 z-50 text-white shadow-lg" style="background: linear-gradient(to right, #c9a830, #d4b440, #c9a830); transition: background 0.5s ease;">
     <div class="max-w-md mx-auto px-4 h-14 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <button class="hamburger-btn" onclick="toggleSideMenu()" aria-label="메뉴">
@@ -597,35 +611,127 @@
   </header>
 
   <!-- Main Content Area -->
-  <main id="mainContent" class="pt-14 pb-20 max-w-md mx-auto scroll-hide" style="min-height: 100vh;">
+  <main id="mainContent" class="pt-14 pb-14 max-w-md mx-auto scroll-hide" style="min-height: 100vh;">
     <!-- Pages rendered here -->
   </main>
 
   <!-- Bottom Navigation Bar -->
   <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] bottom-nav">
     <div class="max-w-md mx-auto grid grid-cols-5">
-      <button onclick="switchPage('home')" id="nav-home" class="nav-btn flex flex-col items-center py-2 pt-3 gap-0.5 transition-all">
-        <i data-lucide="home" class="w-5 h-5"></i>
-        <span class="text-[10px] font-semibold">홈</span>
+      <button onclick="switchPage('home')" id="nav-home" class="nav-btn flex flex-col items-center py-0.5 pt-1 gap-0 transition-all">
+        <i data-lucide="home" class="w-7 h-7"></i>
+        <span class="text-[13px] font-semibold">홈</span>
       </button>
-      <button onclick="switchPage('rate')" id="nav-rate" class="nav-btn flex flex-col items-center py-2 pt-3 gap-0.5 transition-all">
-        <i data-lucide="trending-up" class="w-5 h-5"></i>
-        <span class="text-[10px] font-semibold">환율</span>
+      <button onclick="switchPage('rate')" id="nav-rate" class="nav-btn flex flex-col items-center py-0.5 pt-1 gap-0 transition-all">
+        <i data-lucide="trending-up" class="w-7 h-7"></i>
+        <span class="text-[13px] font-semibold">환율</span>
       </button>
-      <button onclick="switchPage('invest')" id="nav-invest" class="nav-btn flex flex-col items-center py-2 pt-3 gap-0.5 transition-all">
-        <i data-lucide="wallet" class="w-5 h-5"></i>
-        <span class="text-[10px] font-semibold">환전</span>
+      <button onclick="switchPage('invest')" id="nav-invest" class="nav-btn flex flex-col items-center py-0.5 pt-1 gap-0 transition-all">
+        <i data-lucide="wallet" class="w-7 h-7"></i>
+        <span class="text-[13px] font-semibold">환전</span>
       </button>
-      <button onclick="switchPage('stats')" id="nav-stats" class="nav-btn flex flex-col items-center py-2 pt-3 gap-0.5 transition-all">
-        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-        <span class="text-[10px] font-semibold">통계</span>
+      <button onclick="switchPage('stats')" id="nav-stats" class="nav-btn flex flex-col items-center py-0.5 pt-1 gap-0 transition-all">
+        <i data-lucide="bar-chart-3" class="w-7 h-7"></i>
+        <span class="text-[13px] font-semibold">통계</span>
       </button>
-      <button onclick="switchPage('calc')" id="nav-calc" class="nav-btn flex flex-col items-center py-2 pt-3 gap-0.5 transition-all">
-        <i data-lucide="calculator" class="w-5 h-5"></i>
-        <span class="text-[10px] font-semibold">계산</span>
+      <button onclick="switchPage('calc')" id="nav-calc" class="nav-btn flex flex-col items-center py-0.5 pt-1 gap-0 transition-all">
+        <i data-lucide="calculator" class="w-7 h-7"></i>
+        <span class="text-[13px] font-semibold">계산</span>
       </button>
     </div>
   </nav>
+
+  <!-- Grade Info Modal -->
+  <div id="gradeInfoModal" class="fixed inset-0 z-[10000] flex items-center justify-center p-4" style="display:none;">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeGradeInfoModal()" style="z-index:0;"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-[fadeIn_0.2s_ease-out]" style="z-index:1; max-height: 85vh;">
+      <div class="bg-gradient-to-r from-amber-500 to-yellow-600 p-5 flex items-center justify-between">
+        <h3 class="text-white font-bold text-lg flex items-center gap-2">🏆 투자 등급 안내</h3>
+        <button onclick="closeGradeInfoModal()" class="text-white/80 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-5 overflow-y-auto" style="max-height: calc(85vh - 140px);">
+        <p class="text-xs text-gray-500 mb-4">올해 실현된 매도 수익률을 기준으로 등급이 결정됩니다.</p>
+        
+        <div class="space-y-2.5">
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+            <span class="text-2xl">🌱</span>
+            <div class="flex-1">
+              <p class="text-sm font-bold text-gray-700">초보</p>
+              <p class="text-[11px] text-gray-500">아직 매도 기록이 없습니다. 첫 거래를 시작해보세요!</p>
+            </div>
+            <span class="text-[10px] font-semibold text-gray-400 whitespace-nowrap">매도 0건</span>
+          </div>
+
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 border border-gray-200">
+            <span class="text-2xl">😢</span>
+            <div class="flex-1">
+              <p class="text-sm font-bold text-gray-700">손실</p>
+              <p class="text-[11px] text-gray-500">수익률이 마이너스입니다. 환율 변동을 잘 살펴보세요.</p>
+            </div>
+            <span class="text-[10px] font-semibold text-red-400 whitespace-nowrap">수익률 &lt; 0%</span>
+          </div>
+
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-blue-50 border border-blue-100">
+            <span class="text-2xl">💧</span>
+            <div class="flex-1">
+              <p class="text-sm font-bold text-blue-700">하수</p>
+              <p class="text-[11px] text-gray-500">소규모 수익을 달성했습니다. 꾸준히 경험을 쌓아보세요.</p>
+            </div>
+            <span class="text-[10px] font-semibold text-blue-400 whitespace-nowrap">0% ~ 10%</span>
+          </div>
+
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-green-50 border border-green-100">
+            <span class="text-2xl">🌿</span>
+            <div class="flex-1">
+              <p class="text-sm font-bold text-green-700">중수</p>
+              <p class="text-[11px] text-gray-500">안정적인 수익률! 환전 타이밍을 잘 잡고 있습니다.</p>
+            </div>
+            <span class="text-[10px] font-semibold text-green-400 whitespace-nowrap">10% ~ 20%</span>
+          </div>
+
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-purple-50 border border-purple-100">
+            <span class="text-2xl">🔮</span>
+            <div class="flex-1">
+              <p class="text-sm font-bold text-purple-700">고수</p>
+              <p class="text-[11px] text-gray-500">뛰어난 수익률을 기록 중! 환율 분석 능력이 탁월합니다.</p>
+            </div>
+            <span class="text-[10px] font-semibold text-purple-400 whitespace-nowrap">20% ~ 30%</span>
+          </div>
+
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-100 border border-slate-200">
+            <span class="text-2xl">🥈</span>
+            <div class="flex-1">
+              <p class="text-sm font-bold text-slate-700">실버</p>
+              <p class="text-[11px] text-gray-500">상위권 투자자! 높은 수익률로 실력을 증명했습니다.</p>
+            </div>
+            <span class="text-[10px] font-semibold text-slate-500 whitespace-nowrap">30% ~ 50%</span>
+          </div>
+
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-yellow-50 border border-yellow-200">
+            <span class="text-2xl">🥇</span>
+            <div class="flex-1">
+              <p class="text-sm font-bold text-yellow-700">골드</p>
+              <p class="text-[11px] text-gray-500">최상위 투자자! 놀라운 수익률을 달성했습니다.</p>
+            </div>
+            <span class="text-[10px] font-semibold text-yellow-500 whitespace-nowrap">50% ~ 60%</span>
+          </div>
+
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-yellow-100 to-red-100 border border-red-200">
+            <span class="text-2xl">👑</span>
+            <div class="flex-1">
+              <p class="text-sm font-bold text-red-700">투자의 신</p>
+              <p class="text-[11px] text-gray-500">전설적인 수익률! 환전 투자의 절대강자입니다!</p>
+            </div>
+            <span class="text-[10px] font-semibold text-red-500 whitespace-nowrap">60% 이상</span>
+          </div>
+        </div>
+
+        <button type="button" onclick="closeGradeInfoModal()" class="w-full mt-5 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-amber-500 to-yellow-600 hover:opacity-90 transition-all">확인</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // ==========================================
@@ -946,15 +1052,15 @@
       }, 0);
       const rate = totalInv > 0 ? (totalProf / totalInv) * 100 : 0;
 
-      let gradeInfo = { grade: '초보', color: 'text-gray-600', bg: 'bg-gray-100', emoji: '🌱' };
+      let gradeInfo = { grade: '초보', color: 'text-gray-600', bg: 'bg-gray-100', emoji: '🌱', headerGradient: 'linear-gradient(to right, #6b7280, #9ca3af, #6b7280)', sideMenuGradient: 'linear-gradient(180deg, #4b5563 0%, #6b7280 40%, #9ca3af 100%)', gradeIcon: 'sprout', avatarGradient: 'linear-gradient(135deg, #6b7280, #9ca3af)' };
       if (allSold.length > 0) {
-        if (rate < 0) gradeInfo = { grade: '손실', color: 'text-gray-700', bg: 'bg-gray-200', emoji: '😢' };
-        else if (rate < 10) gradeInfo = { grade: '하수', color: 'text-blue-700', bg: 'bg-blue-100', emoji: '💧' };
-        else if (rate < 20) gradeInfo = { grade: '중수', color: 'text-green-700', bg: 'bg-green-100', emoji: '🌿' };
-        else if (rate < 30) gradeInfo = { grade: '고수', color: 'text-purple-700', bg: 'bg-purple-100', emoji: '🔮' };
-        else if (rate < 50) gradeInfo = { grade: '실버', color: 'text-slate-700', bg: 'bg-slate-200', emoji: '🥈' };
-        else if (rate < 60) gradeInfo = { grade: '골드', color: 'text-yellow-700', bg: 'bg-yellow-100', emoji: '🥇' };
-        else gradeInfo = { grade: '투자의 신', color: 'text-red-700', bg: 'bg-gradient-to-r from-yellow-200 to-red-200', emoji: '👑' };
+        if (rate < 0) gradeInfo = { grade: '손실', color: 'text-gray-700', bg: 'bg-gray-200', emoji: '😢', headerGradient: 'linear-gradient(to right, #374151, #4b5563, #374151)', sideMenuGradient: 'linear-gradient(180deg, #1f2937 0%, #374151 40%, #4b5563 100%)', gradeIcon: 'trending-down', avatarGradient: 'linear-gradient(135deg, #374151, #6b7280)' };
+        else if (rate < 10) gradeInfo = { grade: '하수', color: 'text-blue-700', bg: 'bg-blue-100', emoji: '💧', headerGradient: 'linear-gradient(to right, #2563eb, #3b82f6, #2563eb)', sideMenuGradient: 'linear-gradient(180deg, #1d4ed8 0%, #2563eb 40%, #3b82f6 100%)', gradeIcon: 'droplets', avatarGradient: 'linear-gradient(135deg, #2563eb, #60a5fa)' };
+        else if (rate < 20) gradeInfo = { grade: '중수', color: 'text-green-700', bg: 'bg-green-100', emoji: '🌿', headerGradient: 'linear-gradient(to right, #16a34a, #22c55e, #16a34a)', sideMenuGradient: 'linear-gradient(180deg, #15803d 0%, #16a34a 40%, #22c55e 100%)', gradeIcon: 'leaf', avatarGradient: 'linear-gradient(135deg, #16a34a, #4ade80)' };
+        else if (rate < 30) gradeInfo = { grade: '고수', color: 'text-purple-700', bg: 'bg-purple-100', emoji: '🔮', headerGradient: 'linear-gradient(to right, #7c3aed, #8b5cf6, #7c3aed)', sideMenuGradient: 'linear-gradient(180deg, #6d28d9 0%, #7c3aed 40%, #8b5cf6 100%)', gradeIcon: 'gem', avatarGradient: 'linear-gradient(135deg, #7c3aed, #a78bfa)' };
+        else if (rate < 50) gradeInfo = { grade: '실버', color: 'text-slate-700', bg: 'bg-slate-200', emoji: '🥈', headerGradient: 'linear-gradient(to right, #64748b, #94a3b8, #64748b)', sideMenuGradient: 'linear-gradient(180deg, #475569 0%, #64748b 40%, #94a3b8 100%)', gradeIcon: 'award', avatarGradient: 'linear-gradient(135deg, #64748b, #cbd5e1)' };
+        else if (rate < 60) gradeInfo = { grade: '골드', color: 'text-yellow-700', bg: 'bg-yellow-100', emoji: '🥇', headerGradient: 'linear-gradient(to right, #c9a830, #d4b440, #c9a830)', sideMenuGradient: 'linear-gradient(180deg, #6b5a00 0%, #8b7a1a 40%, #a08c2a 100%)', gradeIcon: 'trophy', avatarGradient: 'linear-gradient(135deg, #ca8a04, #facc15)' };
+        else gradeInfo = { grade: '투자의 신', color: 'text-red-700', bg: 'bg-gradient-to-r from-yellow-200 to-red-200', emoji: '👑', headerGradient: 'linear-gradient(to right, #dc2626, #f59e0b, #dc2626)', sideMenuGradient: 'linear-gradient(180deg, #991b1b 0%, #dc2626 30%, #b45309 70%, #d97706 100%)', gradeIcon: 'crown', avatarGradient: 'linear-gradient(135deg, #dc2626, #f59e0b)' };
       }
       return { ...gradeInfo, totalProfit: totalProf, totalInvested: totalInv, returnRate: rate };
     }
@@ -1052,11 +1158,88 @@
     // ==========================================
     // PAGE SWITCHING
     // ==========================================
-    function switchPage(page) {
+    let swipeDirection = null; // 'left' or 'right' for animation
+
+    const PAGE_ORDER = ['home', 'rate', 'invest', 'stats', 'calc'];
+
+    function switchPage(page, direction) {
+      swipeDirection = direction || null;
       state.currentPage = page;
       state.expandedPhase = null;
       render();
+      swipeDirection = null;
     }
+
+    // ==========================================
+    // SWIPE NAVIGATION
+    // ==========================================
+    (function initSwipe() {
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchCurrentX = 0;
+      let isSwiping = false;
+      let isHorizontal = null;
+      const SWIPE_THRESHOLD = 50;
+      const ANGLE_THRESHOLD = 30; // degrees
+
+      const mainEl = document.getElementById('mainContent');
+
+      mainEl.addEventListener('touchstart', function(e) {
+        // Don't swipe if touching input, slider, or scrollable element
+        const tag = e.target.tagName.toLowerCase();
+        if (tag === 'input' || tag === 'textarea' || tag === 'select' || tag === 'canvas') return;
+        
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchCurrentX = touchStartX;
+        isSwiping = true;
+        isHorizontal = null;
+      }, { passive: true });
+
+      mainEl.addEventListener('touchmove', function(e) {
+        if (!isSwiping) return;
+        
+        touchCurrentX = e.touches[0].clientX;
+        const touchCurrentY = e.touches[0].clientY;
+        const diffX = touchCurrentX - touchStartX;
+        const diffY = touchCurrentY - touchStartY;
+
+        // Determine direction on first significant move
+        if (isHorizontal === null && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
+          const angle = Math.abs(Math.atan2(diffY, diffX) * 180 / Math.PI);
+          isHorizontal = (angle < ANGLE_THRESHOLD || angle > (180 - ANGLE_THRESHOLD));
+        }
+
+        if (!isHorizontal) {
+          isSwiping = false;
+          return;
+        }
+      }, { passive: true });
+
+      mainEl.addEventListener('touchend', function(e) {
+        if (!isSwiping || !isHorizontal) {
+          isSwiping = false;
+          isHorizontal = null;
+          return;
+        }
+
+        const diffX = touchCurrentX - touchStartX;
+        const currentIndex = PAGE_ORDER.indexOf(state.currentPage);
+
+        if (Math.abs(diffX) > SWIPE_THRESHOLD) {
+          if (diffX < 0 && currentIndex < PAGE_ORDER.length - 1) {
+            // Swipe left → next page
+            switchPage(PAGE_ORDER[currentIndex + 1], 'left');
+          } else if (diffX > 0 && currentIndex > 0) {
+            // Swipe right → previous page
+            switchPage(PAGE_ORDER[currentIndex - 1], 'right');
+          }
+        }
+
+        isSwiping = false;
+        isHorizontal = null;
+      }, { passive: true });
+    })();
 
     function switchTab(tab) {
       state.activeTab = tab;
@@ -1224,17 +1407,27 @@
         case 'stats': main.innerHTML = renderStatsPage(); break;
       }
 
+      // Apply swipe direction animation
+      if (swipeDirection) {
+        const pageEl = main.querySelector('.page-enter');
+        if (pageEl) {
+          pageEl.classList.remove('page-enter');
+          pageEl.classList.add(swipeDirection === 'left' ? 'page-slide-left' : 'page-slide-right');
+        }
+      }
+
       // Update nav active state
       document.querySelectorAll('.nav-btn').forEach(btn => {
         const id = btn.id.replace('nav-', '');
         if (id === state.currentPage) {
-          btn.className = 'nav-btn flex flex-col items-center py-2 pt-3 gap-0.5 transition-all text-indigo-600';
+          btn.className = 'nav-btn flex flex-col items-center py-0.5 pt-1 gap-0 transition-all text-indigo-600';
         } else {
-          btn.className = 'nav-btn flex flex-col items-center py-2 pt-3 gap-0.5 transition-all text-gray-400';
+          btn.className = 'nav-btn flex flex-col items-center py-0.5 pt-1 gap-0 transition-all text-gray-400';
         }
       });
 
       renderHeaderRight();
+      updateThemeByGrade();
       lucide.createIcons();
     }
 
@@ -1279,6 +1472,43 @@
       const ageEl = document.getElementById('sideProfileAge');
       if (nameEl) nameEl.textContent = profile.nickname || '게스트';
       if (ageEl) ageEl.textContent = profile.age ? profile.age : '프로필을 설정하세요';
+    }
+
+    // ==========================================
+    // THEME BY GRADE (상단바 + 사이드메뉴 색상 + 아이콘)
+    // ==========================================
+    function updateThemeByGrade() {
+      const grade = getGrade();
+      
+      // 상단바 색상 변경
+      const topBar = document.getElementById('topBar');
+      if (topBar) {
+        topBar.style.background = grade.headerGradient;
+      }
+      
+      // 사이드메뉴 색상 변경
+      const sideMenu = document.getElementById('sideMenu');
+      if (sideMenu) {
+        sideMenu.style.background = grade.sideMenuGradient;
+      }
+      
+      // 사이드메뉴 프로필 아바타 아이콘 변경
+      const avatar = document.getElementById('sideProfileAvatar');
+      if (avatar) {
+        avatar.style.background = grade.avatarGradient;
+        // lucide 아이콘 이름으로 교체
+        const iconMap = {
+          'sprout': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>',
+          'trending-down': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',
+          'droplets': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 14.69c1.46 0 2.64-1.22 2.64-2.7 0-.78-.38-1.51-1.13-2.13C13.3 9.24 12.8 8.6 12.56 7.68c-.19.92-.69 1.56-1.46 2.18-.75.62-1.13 1.35-1.13 2.13 0 1.48 1.18 2.7 2.59 2.7z"/><path d="M17 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S17.29 6.75 17 5.3c-.29 1.45-1.14 2.84-2.29 3.76S13 11.1 13 12.25c0 2.22 1.8 4.05 4 4.05z"/></svg>',
+          'leaf': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
+          'gem': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>',
+          'award': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>',
+          'trophy': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
+          'crown': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"/></svg>'
+        };
+        avatar.innerHTML = iconMap[grade.gradeIcon] || iconMap['sprout'];
+      }
     }
 
     function openProfileModal() {
@@ -1603,11 +1833,11 @@
             <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-6 -translate-x-6"></div>
             <div class="absolute top-1/2 right-4 w-16 h-16 bg-white/5 rounded-full"></div>
             <div class="relative z-10">
-              <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center justify-between mb-3 cursor-pointer" onclick="openGradeInfoModal()">
                 <div class="flex items-center gap-2">
                   <span class="text-2xl">${grade.emoji}</span>
                   <div>
-                    <p class="text-white/80 text-xs font-medium">투자 등급</p>
+                    <p class="text-white/80 text-xs font-medium">투자 등급 <span class="text-white/50 text-[10px]">ⓘ</span></p>
                     <p class="text-lg font-extrabold">${grade.grade}</p>
                   </div>
                 </div>
@@ -2262,8 +2492,8 @@
               <label class="text-xs text-gray-500 font-semibold block mb-1.5">
                 ${state.calcDirection === 'krwToForeign' ? '원화 (KRW)' : `${cur} (${ci.sym})`} 입력
               </label>
-              <input type="number" id="calcInput" value="${state.calcAmount}" 
-                oninput="handleCalcInput(this.value)"
+              <input type="text" id="calcInput" value="${formatWithComma(state.calcAmount)}" 
+                oninput="handleCalcInput(this)"
                 class="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl text-xl font-bold text-center focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all"
                 placeholder="금액을 입력하세요" inputmode="decimal" />
             </div>
@@ -2309,10 +2539,38 @@
       `;
     }
 
+    // Format number with commas for display
+    function formatWithComma(val) {
+      if (val === '' || val === undefined || val === null) return '';
+      const str = String(val);
+      // Handle decimal numbers
+      const parts = str.split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return parts.join('.');
+    }
+
+    // Strip commas from string to get raw number
+    function stripComma(val) {
+      return String(val).replace(/,/g, '');
+    }
+
     // FIXED: Separate handler for calc input to avoid re-rendering while typing
     let calcRenderTimeout = null;
-    function handleCalcInput(value) {
-      state.calcAmount = value;
+    function handleCalcInput(el) {
+      const raw = stripComma(el.value);
+      // Allow only valid number characters
+      if (raw !== '' && isNaN(raw)) return;
+      state.calcAmount = raw;
+      
+      // Format with comma while preserving cursor position
+      const cursorPos = el.selectionStart;
+      const beforeLen = el.value.length;
+      const formatted = formatWithComma(raw);
+      el.value = formatted;
+      const afterLen = formatted.length;
+      const newCursor = cursorPos + (afterLen - beforeLen);
+      el.setSelectionRange(newCursor, newCursor);
+      
       // Update the result display without full re-render (prevents keyboard dismiss)
       if (calcRenderTimeout) clearTimeout(calcRenderTimeout);
       calcRenderTimeout = setTimeout(() => {
@@ -2359,7 +2617,7 @@
       // Re-focus after render
       setTimeout(() => {
         const input = document.getElementById('calcInput');
-        if (input) input.value = val;
+        if (input) input.value = formatWithComma(val);
       }, 0);
     }
 
@@ -2581,12 +2839,12 @@
           ${renderCurrencyTabs()}
 
           <!-- Grade Card -->
-          <div class="${grade.bg} rounded-2xl shadow-sm p-4 mb-4 border border-gray-100">
+          <div class="${grade.bg} rounded-2xl shadow-sm p-4 mb-4 border border-gray-100 cursor-pointer" onclick="openGradeInfoModal()">
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
                 <span class="text-2xl">${grade.emoji}</span>
                 <div>
-                  <p class="text-[10px] text-gray-500 font-medium">올해 투자 등급</p>
+                  <p class="text-[10px] text-gray-500 font-medium">올해 투자 등급 <span class="text-gray-400">ⓘ</span></p>
                   <p class="text-lg font-extrabold ${grade.color}">${grade.grade}</p>
                 </div>
               </div>
@@ -2827,6 +3085,17 @@
         closeSideMenu();
       }
     }, { passive: true });
+
+    // ==========================================
+    // GRADE INFO MODAL
+    // ==========================================
+    function openGradeInfoModal() {
+      document.getElementById('gradeInfoModal').style.display = 'flex';
+      lucide.createIcons();
+    }
+    function closeGradeInfoModal() {
+      document.getElementById('gradeInfoModal').style.display = 'none';
+    }
 
     // INITIALIZE
     // ==========================================
