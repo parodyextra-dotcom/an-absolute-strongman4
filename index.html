@@ -15,6 +15,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
@@ -30,20 +31,23 @@
 
     /* Swipe transition */
     .swipe-container {
-      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      will-change: transform;
+      transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.3, 1), opacity 0.22s ease-out;
+      will-change: transform, opacity;
     }
     .swipe-container.swiping {
-      transition: none;
+      transition: none !important;
+    }
+    .swipe-container.snap-back {
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.3, 1), opacity 0.25s ease-out;
     }
     
     /* Smooth page transitions */
-    .page-enter { animation: fadeIn 0.25s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .page-slide-left { animation: slideFromRight 0.25s ease-out; }
-    @keyframes slideFromRight { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
-    .page-slide-right { animation: slideFromLeft 0.25s ease-out; }
-    @keyframes slideFromLeft { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: translateX(0); } }
+    .page-enter { animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .page-slide-left { animation: slideFromRight 0.2s cubic-bezier(0.2, 0.8, 0.3, 1); }
+    @keyframes slideFromRight { from { opacity: 0.3; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+    .page-slide-right { animation: slideFromLeft 0.2s cubic-bezier(0.2, 0.8, 0.3, 1); }
+    @keyframes slideFromLeft { from { opacity: 0.3; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
     
     /* Profit glow */
     .profit-glow { box-shadow: 0 0 20px rgba(34, 197, 94, 0.15), 0 4px 20px rgba(0,0,0,0.08); }
@@ -381,6 +385,231 @@
     .hamburger-line + .hamburger-line {
       margin-top: 4px;
     }
+
+    /* ========== Custom Delete Dialog ========== */
+    .custom-dialog-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .custom-dialog-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .custom-dialog-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .custom-dialog-container {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      background: white;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,255,0.1);
+      transform: scale(0.85) translateY(30px);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .custom-dialog-overlay.active .custom-dialog-container {
+      transform: scale(1) translateY(0);
+    }
+    .custom-dialog-header {
+      position: relative;
+      padding: 32px 28px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 50%, #fce7f3 100%);
+    }
+    .custom-dialog-icon-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4), 0 0 0 6px rgba(239, 68, 68, 0.1);
+      margin-bottom: 16px;
+      animation: dialog-pulse 2s ease-in-out infinite;
+    }
+    @keyframes dialog-pulse {
+      0%, 100% { box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4), 0 0 0 6px rgba(239, 68, 68, 0.1); }
+      50% { box-shadow: 0 8px 32px rgba(239, 68, 68, 0.5), 0 0 0 12px rgba(239, 68, 68, 0.06); }
+    }
+    .custom-dialog-icon-wrap svg {
+      width: 32px;
+      height: 32px;
+      color: white;
+      stroke-width: 2;
+    }
+    .custom-dialog-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1f2937;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+    .custom-dialog-subtitle {
+      font-size: 13px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    .custom-dialog-body {
+      padding: 20px 28px;
+    }
+    .custom-dialog-warning-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .custom-dialog-warning-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #fef2f2;
+      border-radius: 14px;
+      border: 1px solid #fecaca;
+    }
+    .custom-dialog-warning-item .icon-dot {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 10px;
+      background: #fee2e2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .custom-dialog-warning-item .icon-dot svg {
+      width: 16px;
+      height: 16px;
+      color: #ef4444;
+    }
+    .custom-dialog-warning-item span {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      line-height: 1.4;
+    }
+    .custom-dialog-confirm-box {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: #f9fafb;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .custom-dialog-confirm-box:hover {
+      background: #f3f4f6;
+    }
+    .custom-dialog-checkbox {
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      border-radius: 7px;
+      border: 2px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      background: white;
+    }
+    .custom-dialog-checkbox.checked {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      border-color: #ef4444;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+    .custom-dialog-checkbox svg {
+      width: 14px;
+      height: 14px;
+      color: white;
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .custom-dialog-checkbox.checked svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .custom-dialog-confirm-box span {
+      font-size: 13px;
+      color: #6b7280;
+      font-weight: 500;
+      line-height: 1.4;
+      user-select: none;
+    }
+    .custom-dialog-footer {
+      padding: 4px 28px 28px;
+      display: flex;
+      gap: 10px;
+    }
+    .custom-dialog-btn {
+      flex: 1;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: -0.01em;
+    }
+    .custom-dialog-btn-cancel {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+    .custom-dialog-btn-cancel:hover {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .custom-dialog-btn-cancel:active {
+      transform: scale(0.97);
+    }
+    .custom-dialog-btn-delete {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+      opacity: 0.4;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    .custom-dialog-btn-delete.enabled {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .custom-dialog-btn-delete.enabled:hover {
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+      transform: translateY(-1px);
+    }
+    .custom-dialog-btn-delete.enabled:active {
+      transform: scale(0.97) translateY(0);
+    }
+    /* Shake animation for delete button */
+    @keyframes dialog-shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(3px); }
+    }
+    .dialog-shake {
+      animation: dialog-shake 0.5s ease;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-gray-50">
@@ -708,7 +937,7 @@
   </header>
 
   <!-- Main Content Area -->
-  <main id="mainContent" class="pt-14 pb-14 max-w-md mx-auto scroll-hide" style="min-height: 100vh;">
+  <main id="mainContent" class="swipe-container pt-14 pb-14 max-w-md mx-auto scroll-hide" style="min-height: 100vh;">
     <!-- Pages rendered here -->
   </main>
 
@@ -1268,74 +1497,189 @@
     }
 
     // ==========================================
-    // SWIPE NAVIGATION
+    // SWIPE NAVIGATION (Enhanced)
     // ==========================================
     (function initSwipe() {
       let touchStartX = 0;
       let touchStartY = 0;
       let touchCurrentX = 0;
+      let touchStartTime = 0;
       let isSwiping = false;
       let isHorizontal = null;
-      const SWIPE_THRESHOLD = 50;
-      const ANGLE_THRESHOLD = 30; // degrees
+      let hasMoved = false;
+      let velocityX = 0;
+      let lastMoveX = 0;
+      let lastMoveTime = 0;
+      const SWIPE_THRESHOLD = 25; // 50→25px: much more responsive
+      const VELOCITY_THRESHOLD = 0.3; // px/ms: fast flick detection
+      const DIRECTION_LOCK_THRESHOLD = 6; // 10→6px: faster direction lock
+      const ANGLE_THRESHOLD = 35; // slightly more forgiving angle
+      const MAX_DRAG = 0.35; // max drag as fraction of screen width
 
       const mainEl = document.getElementById('mainContent');
 
+      // Check if element or parent is horizontally scrollable
+      function isScrollableElement(el) {
+        while (el && el !== mainEl) {
+          const tag = el.tagName?.toLowerCase();
+          if (tag === 'input' || tag === 'textarea' || tag === 'select' || tag === 'canvas') return true;
+          if (el.getAttribute && (el.getAttribute('data-no-swipe') !== null)) return true;
+          // Check for horizontal scroll
+          if (el.scrollWidth > el.clientWidth + 2) {
+            const style = window.getComputedStyle(el);
+            const overflow = style.overflowX;
+            if (overflow === 'auto' || overflow === 'scroll') return true;
+          }
+          el = el.parentElement;
+        }
+        return false;
+      }
+
       mainEl.addEventListener('touchstart', function(e) {
-        // Don't swipe if touching input, slider, or scrollable element
-        const tag = e.target.tagName.toLowerCase();
-        if (tag === 'input' || tag === 'textarea' || tag === 'select' || tag === 'canvas') return;
+        if (isScrollableElement(e.target)) {
+          isSwiping = false;
+          return;
+        }
         
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
         touchCurrentX = touchStartX;
+        touchStartTime = Date.now();
+        lastMoveX = touchStartX;
+        lastMoveTime = touchStartTime;
+        velocityX = 0;
         isSwiping = true;
         isHorizontal = null;
+        hasMoved = false;
       }, { passive: true });
 
       mainEl.addEventListener('touchmove', function(e) {
         if (!isSwiping) return;
         
-        touchCurrentX = e.touches[0].clientX;
-        const touchCurrentY = e.touches[0].clientY;
-        const diffX = touchCurrentX - touchStartX;
-        const diffY = touchCurrentY - touchStartY;
+        const nowX = e.touches[0].clientX;
+        const nowY = e.touches[0].clientY;
+        const diffX = nowX - touchStartX;
+        const diffY = nowY - touchStartY;
 
-        // Determine direction on first significant move
-        if (isHorizontal === null && (Math.abs(diffX) > 10 || Math.abs(diffY) > 10)) {
+        // Determine direction on first significant move (faster lock)
+        if (isHorizontal === null && (Math.abs(diffX) > DIRECTION_LOCK_THRESHOLD || Math.abs(diffY) > DIRECTION_LOCK_THRESHOLD)) {
           const angle = Math.abs(Math.atan2(diffY, diffX) * 180 / Math.PI);
           isHorizontal = (angle < ANGLE_THRESHOLD || angle > (180 - ANGLE_THRESHOLD));
+          if (!isHorizontal) {
+            isSwiping = false;
+            return;
+          }
+          // Add swiping class for instant visual feedback
+          mainEl.classList.add('swiping');
         }
 
-        if (!isHorizontal) {
-          isSwiping = false;
-          return;
+        if (!isHorizontal) return;
+
+        // Prevent vertical scroll during horizontal swipe
+        e.preventDefault();
+
+        // Track velocity
+        const now = Date.now();
+        if (now - lastMoveTime > 0) {
+          velocityX = (nowX - lastMoveX) / (now - lastMoveTime);
         }
-      }, { passive: true });
+        lastMoveX = nowX;
+        lastMoveTime = now;
+        touchCurrentX = nowX;
+        hasMoved = true;
+
+        // Real-time visual drag feedback
+        const currentIndex = PAGE_ORDER.indexOf(state.currentPage);
+        const screenW = window.innerWidth;
+        let dragX = diffX;
+
+        // Limit drag at edges (rubber band effect)
+        if ((diffX > 0 && currentIndex === 0) || (diffX < 0 && currentIndex === PAGE_ORDER.length - 1)) {
+          dragX = diffX * 0.2; // rubber band
+        } else {
+          dragX = Math.max(-screenW * MAX_DRAG, Math.min(screenW * MAX_DRAG, diffX));
+        }
+
+        // Apply transform for drag feedback
+        const opacity = 1 - Math.abs(dragX) / screenW * 0.4;
+        mainEl.style.transform = `translateX(${dragX}px)`;
+        mainEl.style.opacity = opacity;
+      }, { passive: false });
 
       mainEl.addEventListener('touchend', function(e) {
-        if (!isSwiping || !isHorizontal) {
+        mainEl.classList.remove('swiping');
+
+        if (!isSwiping || !isHorizontal || !hasMoved) {
+          // Reset any partial transform
+          if (hasMoved) {
+            mainEl.classList.add('snap-back');
+            mainEl.style.transform = '';
+            mainEl.style.opacity = '';
+            setTimeout(() => mainEl.classList.remove('snap-back'), 260);
+          }
           isSwiping = false;
           isHorizontal = null;
+          hasMoved = false;
           return;
         }
 
         const diffX = touchCurrentX - touchStartX;
         const currentIndex = PAGE_ORDER.indexOf(state.currentPage);
+        const elapsed = Date.now() - touchStartTime;
+        
+        // Detect swipe by distance OR velocity (fast flick)
+        const isSwipeByDistance = Math.abs(diffX) > SWIPE_THRESHOLD;
+        const isSwipeByVelocity = Math.abs(velocityX) > VELOCITY_THRESHOLD && elapsed < 300;
+        const shouldSwipe = isSwipeByDistance || isSwipeByVelocity;
 
-        if (Math.abs(diffX) > SWIPE_THRESHOLD) {
-          if (diffX < 0 && currentIndex < PAGE_ORDER.length - 1) {
-            // Swipe left → next page
+        // Reset transform before page switch
+        mainEl.style.transition = 'none';
+        mainEl.style.transform = '';
+        mainEl.style.opacity = '';
+        // Force reflow
+        mainEl.offsetHeight;
+        mainEl.style.transition = '';
+
+        if (shouldSwipe) {
+          const dir = (diffX < 0 || velocityX < -VELOCITY_THRESHOLD) ? -1 : 1;
+          if (dir < 0 && currentIndex < PAGE_ORDER.length - 1) {
             switchPage(PAGE_ORDER[currentIndex + 1], 'left');
-          } else if (diffX > 0 && currentIndex > 0) {
-            // Swipe right → previous page
+          } else if (dir > 0 && currentIndex > 0) {
             switchPage(PAGE_ORDER[currentIndex - 1], 'right');
           }
         }
 
         isSwiping = false;
         isHorizontal = null;
+        hasMoved = false;
+        velocityX = 0;
       }, { passive: true });
+
+      // Also support pointer events for better desktop testing
+      let pointerDown = false;
+      let pointerStartX = 0;
+      mainEl.addEventListener('pointerdown', function(e) {
+        if (e.pointerType === 'touch') return; // handled by touch events
+        if (isScrollableElement(e.target)) return;
+        pointerDown = true;
+        pointerStartX = e.clientX;
+      });
+      mainEl.addEventListener('pointermove', function(e) {
+        if (!pointerDown || e.pointerType === 'touch') return;
+      });
+      mainEl.addEventListener('pointerup', function(e) {
+        if (!pointerDown || e.pointerType === 'touch') return;
+        const diff = e.clientX - pointerStartX;
+        const currentIndex = PAGE_ORDER.indexOf(state.currentPage);
+        if (Math.abs(diff) > SWIPE_THRESHOLD) {
+          if (diff < 0 && currentIndex < PAGE_ORDER.length - 1) {
+            switchPage(PAGE_ORDER[currentIndex + 1], 'left');
+          } else if (diff > 0 && currentIndex > 0) {
+            switchPage(PAGE_ORDER[currentIndex - 1], 'right');
+          }
+        }
+        pointerDown = false;
+      });
     })();
 
     function switchTab(tab) {
@@ -1757,8 +2101,91 @@
     }
 
     function confirmDeleteAllData() {
-      if (!confirm('⚠️ 정말로 모든 데이터를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.\n삭제 전 백업을 권장합니다.')) return;
-      if (!confirm('❗ 마지막 확인\n\n모든 환전 기록, 설정, 프로필이 삭제됩니다.\n정말 삭제하시겠습니까?')) return;
+      showDeleteDialog();
+    }
+
+    function showDeleteDialog() {
+      // Remove existing dialog if any
+      let existing = document.getElementById('customDeleteDialog');
+      if (existing) existing.remove();
+
+      const dialog = document.createElement('div');
+      dialog.id = 'customDeleteDialog';
+      dialog.className = 'custom-dialog-overlay';
+      dialog.innerHTML = `
+        <div class="custom-dialog-backdrop" onclick="closeDeleteDialog()"></div>
+        <div class="custom-dialog-container">
+          <div class="custom-dialog-header">
+            <div class="custom-dialog-icon-wrap">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </div>
+            <div class="custom-dialog-title">모든 데이터 삭제</div>
+            <div class="custom-dialog-subtitle">이 작업은 되돌릴 수 없습니다</div>
+          </div>
+          <div class="custom-dialog-body">
+            <div class="custom-dialog-warning-list">
+              <div class="custom-dialog-warning-item">
+                <div class="icon-dot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+                <span>모든 환전 기록이 삭제됩니다</span>
+              </div>
+              <div class="custom-dialog-warning-item">
+                <div class="icon-dot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                <span>프로필 및 설정이 초기화됩니다</span>
+              </div>
+              <div class="custom-dialog-warning-item">
+                <div class="icon-dot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                <span>삭제 전 백업을 권장합니다</span>
+              </div>
+            </div>
+            <div class="custom-dialog-confirm-box" id="deleteConfirmBox" onclick="toggleDeleteConfirm()">
+              <div class="custom-dialog-checkbox" id="deleteCheckbox">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <span>위 내용을 확인했으며, 삭제에 동의합니다</span>
+            </div>
+          </div>
+          <div class="custom-dialog-footer">
+            <button class="custom-dialog-btn custom-dialog-btn-cancel" onclick="closeDeleteDialog()">취소</button>
+            <button class="custom-dialog-btn custom-dialog-btn-delete" id="deleteConfirmBtn" onclick="executeDeleteAllData()">삭제하기</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(dialog);
+      // Trigger animation
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          dialog.classList.add('active');
+        });
+      });
+    }
+
+    function toggleDeleteConfirm() {
+      const checkbox = document.getElementById('deleteCheckbox');
+      const btn = document.getElementById('deleteConfirmBtn');
+      const isChecked = checkbox.classList.toggle('checked');
+      if (isChecked) {
+        btn.classList.add('enabled');
+      } else {
+        btn.classList.remove('enabled');
+      }
+    }
+
+    function closeDeleteDialog() {
+      const dialog = document.getElementById('customDeleteDialog');
+      if (!dialog) return;
+      dialog.classList.remove('active');
+      setTimeout(() => dialog.remove(), 300);
+    }
+
+    function executeDeleteAllData() {
+      const checkbox = document.getElementById('deleteCheckbox');
+      if (!checkbox || !checkbox.classList.contains('checked')) {
+        const btn = document.getElementById('deleteConfirmBtn');
+        if (btn) btn.classList.add('dialog-shake');
+        setTimeout(() => { if (btn) btn.classList.remove('dialog-shake'); }, 500);
+        return;
+      }
+      // Perform deletion
       localStorage.removeItem('currencyPortfolio');
       localStorage.removeItem('userProfile');
       localStorage.removeItem('adFree');
@@ -1775,6 +2202,7 @@
       state.targetBuyRate_JPY = '';
       state.targetBuyRate_EUR = '';
       state.targetBuyRate_CNY = '';
+      closeDeleteDialog();
       render();
       closeSettingsModal();
       showToast('모든 데이터가 삭제되었습니다 🗑️');
@@ -2824,17 +3252,22 @@
     // Destroy existing charts
     let profitChartInstance = null;
     let donutChartInstance = null;
+    let currencyProfitChartInstance = null;
 
     function renderStatsCharts(sortedStats, allCurrencyStats) {
       setTimeout(() => {
-        // --- Profit Bar Chart ---
+        // Register datalabels plugin
+        Chart.register(ChartDataLabels);
+
+        // --- Profit Bar Chart (Enhanced with amount labels) ---
         const profitCanvas = document.getElementById('profitChart');
         if (profitCanvas && sortedStats.length > 0) {
           if (profitChartInstance) profitChartInstance.destroy();
           const ctx = profitCanvas.getContext('2d');
           const labels = sortedStats.map(s => s.period);
           const profits = sortedStats.map(s => Math.round(s.prof));
-          const bgColors = profits.map(v => v >= 0 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.7)');
+          const investments = sortedStats.map(s => Math.round(s.inv));
+          const bgColors = profits.map(v => v >= 0 ? 'rgba(239, 68, 68, 0.75)' : 'rgba(59, 130, 246, 0.75)');
           const borderColors = profits.map(v => v >= 0 ? 'rgba(239, 68, 68, 1)' : 'rgba(59, 130, 246, 1)');
 
           profitChartInstance = new Chart(ctx, {
@@ -2846,21 +3279,45 @@
                 data: profits,
                 backgroundColor: bgColors,
                 borderColor: borderColors,
-                borderWidth: 1,
-                borderRadius: 6,
-                maxBarThickness: 40
+                borderWidth: 1.5,
+                borderRadius: 8,
+                maxBarThickness: 50
               }]
             },
             options: {
               responsive: true,
               maintainAspectRatio: false,
+              layout: { padding: { top: 30 } },
               plugins: {
                 legend: { display: false },
+                datalabels: {
+                  anchor: (ctx) => ctx.dataset.data[ctx.dataIndex] >= 0 ? 'end' : 'start',
+                  align: (ctx) => ctx.dataset.data[ctx.dataIndex] >= 0 ? 'top' : 'bottom',
+                  formatter: (v) => {
+                    if (Math.abs(v) >= 100000000) return `${v >= 0 ? '+' : ''}${(v/100000000).toFixed(1)}억`;
+                    return `${v >= 0 ? '+' : ''}${(v/10000).toFixed(1)}만`;
+                  },
+                  color: (ctx) => ctx.dataset.data[ctx.dataIndex] >= 0 ? '#dc2626' : '#2563eb',
+                  font: { size: 10, weight: 'bold' },
+                  padding: 2
+                },
                 tooltip: {
+                  backgroundColor: 'rgba(15,23,42,0.9)',
+                  titleFont: { size: 12, weight: 'bold' },
+                  bodyFont: { size: 11 },
+                  padding: 12,
+                  cornerRadius: 10,
                   callbacks: {
+                    title: (items) => `📅 ${items[0].label}`,
                     label: (ctx) => {
                       const v = ctx.raw;
-                      return `${v >= 0 ? '+' : ''}${(v/10000).toFixed(1)}만원`;
+                      const inv = investments[ctx.dataIndex];
+                      const rate = inv > 0 ? ((v / inv) * 100).toFixed(2) : '0.00';
+                      return [
+                        `💰 수익금: ${v >= 0 ? '+' : ''}${v.toLocaleString()}원 (${(v/10000).toFixed(1)}만원)`,
+                        `📊 투자금: ${inv.toLocaleString()}원 (${(inv/10000).toFixed(0)}만원)`,
+                        `📈 수익률: ${v >= 0 ? '+' : ''}${rate}%`
+                      ];
                     }
                   }
                 }
@@ -2868,7 +3325,10 @@
               scales: {
                 y: {
                   ticks: {
-                    callback: (v) => (v/10000).toFixed(0) + '만',
+                    callback: (v) => {
+                      if (Math.abs(v) >= 100000000) return (v/100000000).toFixed(1) + '억';
+                      return (v/10000).toFixed(0) + '만';
+                    },
                     font: { size: 10 }
                   },
                   grid: { color: 'rgba(0,0,0,0.05)' }
@@ -2882,7 +3342,7 @@
           });
         }
 
-        // --- Donut Chart (all currencies) ---
+        // --- Donut Chart (all currencies) - Enhanced with amounts ---
         const donutCanvas = document.getElementById('donutChart');
         if (donutCanvas && allCurrencyStats.sorted && allCurrencyStats.sorted.length > 0) {
           if (donutChartInstance) donutChartInstance.destroy();
@@ -2890,24 +3350,55 @@
 
           // Aggregate totals by currency across all periods
           const totals = { USD: 0, JPY: 0, EUR: 0, CNY: 0 };
+          const profitTotals = { USD: 0, JPY: 0, EUR: 0, CNY: 0 };
           allCurrencyStats.sorted.forEach(s => {
             ['USD', 'JPY', 'EUR', 'CNY'].forEach(c => {
               totals[c] += Math.abs(s.byCurrencyInv[c] || 0);
+              profitTotals[c] += (s.byCurrency[c] || 0);
             });
           });
 
           const activeCurrencies = Object.entries(totals).filter(([, v]) => v > 0);
+          const grandTotal = activeCurrencies.reduce((s, [, v]) => s + v, 0);
+
           if (activeCurrencies.length > 0) {
             const colorMap = {
-              USD: { bg: 'rgba(34, 197, 94, 0.8)', border: 'rgba(34, 197, 94, 1)' },
-              JPY: { bg: 'rgba(239, 68, 68, 0.8)', border: 'rgba(239, 68, 68, 1)' },
-              EUR: { bg: 'rgba(59, 130, 246, 0.8)', border: 'rgba(59, 130, 246, 1)' },
-              CNY: { bg: 'rgba(245, 158, 11, 0.8)', border: 'rgba(245, 158, 11, 1)' }
+              USD: { bg: 'rgba(34, 197, 94, 0.85)', border: 'rgba(34, 197, 94, 1)', light: '#dcfce7' },
+              JPY: { bg: 'rgba(239, 68, 68, 0.85)', border: 'rgba(239, 68, 68, 1)', light: '#fee2e2' },
+              EUR: { bg: 'rgba(59, 130, 246, 0.85)', border: 'rgba(59, 130, 246, 1)', light: '#dbeafe' },
+              CNY: { bg: 'rgba(245, 158, 11, 0.85)', border: 'rgba(245, 158, 11, 1)', light: '#fef3c7' }
             };
             const flagMap = { USD: '🇺🇸 USD', JPY: '🇯🇵 JPY', EUR: '🇪🇺 EUR', CNY: '🇨🇳 CNY' };
 
+            // Center text plugin
+            const centerTextPlugin = {
+              id: 'centerText',
+              afterDraw: (chart) => {
+                const { ctx, width, height } = chart;
+                const meta = chart.getDatasetMeta(0);
+                if (!meta || !meta.data || meta.data.length === 0) return;
+                const centerX = (meta.data[0].x);
+                const centerY = (meta.data[0].y);
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = 'bold 10px Inter, sans-serif';
+                ctx.fillStyle = '#9ca3af';
+                ctx.fillText('총 투자금', centerX, centerY - 12);
+                ctx.font = 'bold 16px Inter, sans-serif';
+                ctx.fillStyle = '#1f2937';
+                if (grandTotal >= 100000000) {
+                  ctx.fillText((grandTotal/100000000).toFixed(1) + '억원', centerX, centerY + 8);
+                } else {
+                  ctx.fillText(Math.round(grandTotal/10000).toLocaleString() + '만원', centerX, centerY + 8);
+                }
+                ctx.restore();
+              }
+            };
+
             donutChartInstance = new Chart(ctx2, {
               type: 'doughnut',
+              plugins: [centerTextPlugin],
               data: {
                 labels: activeCurrencies.map(([c]) => flagMap[c]),
                 datasets: [{
@@ -2915,32 +3406,209 @@
                   backgroundColor: activeCurrencies.map(([c]) => colorMap[c].bg),
                   borderColor: activeCurrencies.map(([c]) => colorMap[c].border),
                   borderWidth: 2,
-                  hoverOffset: 8
+                  hoverOffset: 12,
+                  spacing: 2
                 }]
               },
               options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '55%',
+                cutout: '58%',
                 plugins: {
                   legend: {
                     position: 'bottom',
-                    labels: { font: { size: 11, weight: 'bold' }, padding: 12, usePointStyle: true }
+                    labels: { 
+                      font: { size: 11, weight: 'bold' }, 
+                      padding: 16, 
+                      usePointStyle: true,
+                      pointStyleWidth: 12,
+                      generateLabels: (chart) => {
+                        const data = chart.data;
+                        return data.labels.map((label, i) => {
+                          const value = data.datasets[0].data[i];
+                          const pct = ((value / grandTotal) * 100).toFixed(1);
+                          return {
+                            text: `${label}  ${Math.round(value/10000).toLocaleString()}만원 (${pct}%)`,
+                            fillStyle: data.datasets[0].backgroundColor[i],
+                            strokeStyle: data.datasets[0].borderColor[i],
+                            lineWidth: 1,
+                            pointStyle: 'circle',
+                            hidden: false,
+                            index: i
+                          };
+                        });
+                      }
+                    }
+                  },
+                  datalabels: {
+                    formatter: (value) => {
+                      const pct = ((value / grandTotal) * 100).toFixed(1);
+                      if (pct < 8) return '';
+                      if (value >= 100000000) return `${(value/100000000).toFixed(1)}억\n${pct}%`;
+                      return `${Math.round(value/10000)}만\n${pct}%`;
+                    },
+                    color: '#fff',
+                    font: { size: 11, weight: 'bold', lineHeight: 1.3 },
+                    textAlign: 'center'
                   },
                   tooltip: {
+                    backgroundColor: 'rgba(15,23,42,0.9)',
+                    titleFont: { size: 12, weight: 'bold' },
+                    bodyFont: { size: 11 },
+                    padding: 12,
+                    cornerRadius: 10,
                     callbacks: {
                       label: (ctx) => {
-                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                        const pct = ((ctx.raw / total) * 100).toFixed(1);
-                        return `${ctx.label}: ${(ctx.raw/10000).toFixed(0)}만원 (${pct}%)`;
+                        const pct = ((ctx.raw / grandTotal) * 100).toFixed(1);
+                        const cur = activeCurrencies[ctx.dataIndex][0];
+                        const profit = profitTotals[cur];
+                        return [
+                          `💰 투자금: ${ctx.raw.toLocaleString()}원 (${Math.round(ctx.raw/10000).toLocaleString()}만원)`,
+                          `📊 비중: ${pct}%`,
+                          `📈 수익금: ${profit >= 0 ? '+' : ''}${Math.round(profit).toLocaleString()}원 (${(profit/10000).toFixed(1)}만원)`
+                        ];
                       }
                     }
                   }
                 }
               }
             });
+
+            // Render detail table below donut chart
+            const detailTable = document.getElementById('donutDetailTable');
+            if (detailTable) {
+              let tableHtml = '<p class="text-[10px] font-semibold text-gray-500 mb-2">📋 통화별 상세 내역</p>';
+              tableHtml += '<div class="space-y-2">';
+              activeCurrencies.forEach(([cur, inv]) => {
+                const pct = ((inv / grandTotal) * 100).toFixed(1);
+                const profit = profitTotals[cur];
+                const rate = inv > 0 ? ((profit / inv) * 100).toFixed(2) : '0.00';
+                tableHtml += `
+                  <div class="flex items-center justify-between p-2.5 rounded-xl" style="background: ${colorMap[cur].light}">
+                    <div class="flex items-center gap-2">
+                      <div class="w-3 h-3 rounded-full" style="background: ${colorMap[cur].border}"></div>
+                      <span class="text-xs font-bold text-gray-700">${flagMap[cur]}</span>
+                      <span class="text-[10px] text-gray-400">(${pct}%)</span>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-xs font-bold text-gray-700">${Math.round(inv/10000).toLocaleString()}만원</p>
+                      <p class="text-[10px] font-semibold ${profit >= 0 ? 'text-red-500' : 'text-blue-500'}">수익 ${profit >= 0 ? '+' : ''}${(profit/10000).toFixed(1)}만원 (${rate}%)</p>
+                    </div>
+                  </div>
+                `;
+              });
+              tableHtml += '</div>';
+              detailTable.innerHTML = tableHtml;
+            }
           }
         }
+
+        // --- Currency Profit Comparison Chart ---
+        const currencyProfitCanvas = document.getElementById('currencyProfitChart');
+        if (currencyProfitCanvas && allCurrencyStats.sorted && allCurrencyStats.sorted.length > 0) {
+          if (currencyProfitChartInstance) currencyProfitChartInstance.destroy();
+          const ctx3 = currencyProfitCanvas.getContext('2d');
+
+          const profitsByCurrency = { USD: 0, JPY: 0, EUR: 0, CNY: 0 };
+          const invByCurrency = { USD: 0, JPY: 0, EUR: 0, CNY: 0 };
+          allCurrencyStats.sorted.forEach(s => {
+            ['USD', 'JPY', 'EUR', 'CNY'].forEach(c => {
+              profitsByCurrency[c] += (s.byCurrency[c] || 0);
+              invByCurrency[c] += Math.abs(s.byCurrencyInv[c] || 0);
+            });
+          });
+
+          const currencies = ['USD', 'JPY', 'EUR', 'CNY'];
+          const activeForProfit = currencies.filter(c => invByCurrency[c] > 0);
+          
+          if (activeForProfit.length > 0) {
+            const flagLabels = { USD: '🇺🇸 USD', JPY: '🇯🇵 JPY', EUR: '🇪🇺 EUR', CNY: '🇨🇳 CNY' };
+            const barColorMap = {
+              USD: { pos: 'rgba(34,197,94,0.8)', neg: 'rgba(34,197,94,0.4)' },
+              JPY: { pos: 'rgba(239,68,68,0.8)', neg: 'rgba(239,68,68,0.4)' },
+              EUR: { pos: 'rgba(59,130,246,0.8)', neg: 'rgba(59,130,246,0.4)' },
+              CNY: { pos: 'rgba(245,158,11,0.8)', neg: 'rgba(245,158,11,0.4)' }
+            };
+            const profitValues = activeForProfit.map(c => Math.round(profitsByCurrency[c]));
+            const bgColorsProfit = activeForProfit.map((c, i) => profitValues[i] >= 0 ? barColorMap[c].pos : barColorMap[c].neg);
+
+            currencyProfitChartInstance = new Chart(ctx3, {
+              type: 'bar',
+              data: {
+                labels: activeForProfit.map(c => flagLabels[c]),
+                datasets: [{
+                  label: '수익금',
+                  data: profitValues,
+                  backgroundColor: bgColorsProfit,
+                  borderColor: activeForProfit.map(c => barColorMap[c].pos),
+                  borderWidth: 1.5,
+                  borderRadius: 8,
+                  maxBarThickness: 60
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                layout: { padding: { right: 20 } },
+                plugins: {
+                  legend: { display: false },
+                  datalabels: {
+                    anchor: (ctx) => ctx.dataset.data[ctx.dataIndex] >= 0 ? 'end' : 'start',
+                    align: (ctx) => ctx.dataset.data[ctx.dataIndex] >= 0 ? 'right' : 'left',
+                    formatter: (v, ctx) => {
+                      const cur = activeForProfit[ctx.dataIndex];
+                      const inv = invByCurrency[cur];
+                      const rate = inv > 0 ? ((v / inv) * 100).toFixed(1) : '0.0';
+                      if (Math.abs(v) >= 100000000) return `${v >= 0 ? '+' : ''}${(v/100000000).toFixed(1)}억 (${rate}%)`;
+                      return `${v >= 0 ? '+' : ''}${(v/10000).toFixed(1)}만 (${rate}%)`;
+                    },
+                    color: (ctx) => ctx.dataset.data[ctx.dataIndex] >= 0 ? '#dc2626' : '#2563eb',
+                    font: { size: 10, weight: 'bold' },
+                    padding: 4
+                  },
+                  tooltip: {
+                    backgroundColor: 'rgba(15,23,42,0.9)',
+                    titleFont: { size: 12, weight: 'bold' },
+                    bodyFont: { size: 11 },
+                    padding: 12,
+                    cornerRadius: 10,
+                    callbacks: {
+                      label: (ctx) => {
+                        const v = ctx.raw;
+                        const cur = activeForProfit[ctx.dataIndex];
+                        const inv = invByCurrency[cur];
+                        const rate = inv > 0 ? ((v / inv) * 100).toFixed(2) : '0.00';
+                        return [
+                          `💰 수익금: ${v >= 0 ? '+' : ''}${v.toLocaleString()}원 (${(v/10000).toFixed(1)}만원)`,
+                          `📊 투자금: ${inv.toLocaleString()}원 (${Math.round(inv/10000).toLocaleString()}만원)`,
+                          `📈 수익률: ${v >= 0 ? '+' : ''}${rate}%`
+                        ];
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  x: {
+                    ticks: {
+                      callback: (v) => {
+                        if (Math.abs(v) >= 100000000) return (v/100000000).toFixed(1) + '억';
+                        return (v/10000).toFixed(0) + '만';
+                      },
+                      font: { size: 10 }
+                    },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                  },
+                  y: {
+                    ticks: { font: { size: 11, weight: 'bold' } },
+                    grid: { display: false }
+                  }
+                }
+              }
+            });
+          }
+        }
+
       }, 100);
     }
 
@@ -3049,32 +3717,6 @@
             </div>
           </div>
 
-          <!-- Profit Chart -->
-          ${allSorted.length > 0 ? `
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
-              <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2 mb-3">
-                <i data-lucide="trending-up" class="w-4 h-4 text-indigo-500"></i>
-                ${periodLabel} 수익금 그래프
-              </h3>
-              <div style="height: 220px; position: relative;">
-                <canvas id="profitChart"></canvas>
-              </div>
-            </div>
-          ` : ''}
-
-          <!-- Donut Chart - Currency Distribution -->
-          ${allSorted.length > 0 ? `
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
-              <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2 mb-3">
-                <i data-lucide="pie-chart" class="w-4 h-4 text-purple-500"></i>
-                ${periodLabel} 전체 통화별 투자 비중
-              </h3>
-              <div style="height: 260px; position: relative;">
-                <canvas id="donutChart"></canvas>
-              </div>
-            </div>
-          ` : ''}
-
           <!-- Stats Results (per-currency) -->
           ${stats.length > 0 ? `
             <div class="space-y-3">
@@ -3128,6 +3770,65 @@
               <p class="text-xs text-gray-300 mt-1">매도 완료된 거래가 있어야 통계가 표시됩니다</p>
             </div>
           `}
+
+          <!-- ===== Charts Section (맨 하단) ===== -->
+          ${allSorted.length > 0 ? `
+            <!-- Profit Bar Chart -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4 mt-5">
+              <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2 mb-1">
+                <i data-lucide="trending-up" class="w-4 h-4 text-indigo-500"></i>
+                ${periodLabel} 수익금 그래프
+              </h3>
+              <p class="text-[10px] text-gray-400 mb-3 ml-6">기간별 실현 수익금을 막대그래프로 표시합니다</p>
+              <div style="height: 320px; position: relative;">
+                <canvas id="profitChart"></canvas>
+              </div>
+              <!-- Bar Chart Summary -->
+              <div class="mt-3 pt-3 border-t border-gray-100">
+                <div class="grid grid-cols-3 gap-2 text-center">
+                  <div class="bg-gray-50 rounded-xl p-2">
+                    <p class="text-[10px] text-gray-500">총 기간수</p>
+                    <p class="font-bold text-sm text-gray-700">${allSorted.length}개</p>
+                  </div>
+                  <div class="bg-red-50 rounded-xl p-2">
+                    <p class="text-[10px] text-gray-500">총 수익금</p>
+                    <p class="font-bold text-sm ${allSorted.reduce((s, x) => s + x.prof, 0) >= 0 ? 'text-red-600' : 'text-blue-600'}">${allSorted.reduce((s, x) => s + x.prof, 0) >= 0 ? '+' : ''}${fmtMan(allSorted.reduce((s, x) => s + x.prof, 0))}원</p>
+                  </div>
+                  <div class="bg-indigo-50 rounded-xl p-2">
+                    <p class="text-[10px] text-gray-500">총 투자금</p>
+                    <p class="font-bold text-sm text-indigo-600">${fmtManInt(allSorted.reduce((s, x) => s + x.inv, 0))}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Donut Chart - Currency Distribution -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+              <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2 mb-1">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-purple-500"></i>
+                ${periodLabel} 전체 통화별 투자 비중
+              </h3>
+              <p class="text-[10px] text-gray-400 mb-3 ml-6">통화별 투자금 비율을 도넛 그래프로 표시합니다</p>
+              <div style="height: 320px; position: relative;">
+                <canvas id="donutChart"></canvas>
+              </div>
+              <!-- Donut Chart Detail Table -->
+              <div class="mt-3 pt-3 border-t border-gray-100" id="donutDetailTable"></div>
+            </div>
+
+            <!-- Currency Profit Breakdown Chart -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4">
+              <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2 mb-1">
+                <i data-lucide="bar-chart-2" class="w-4 h-4 text-emerald-500"></i>
+                통화별 수익금 비교
+              </h3>
+              <p class="text-[10px] text-gray-400 mb-3 ml-6">각 통화별 실현 수익금을 비교합니다</p>
+              <div style="height: 280px; position: relative;">
+                <canvas id="currencyProfitChart"></canvas>
+              </div>
+            </div>
+          ` : ''}
+
         </div>
       `;
     }
